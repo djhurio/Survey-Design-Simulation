@@ -7,6 +7,10 @@ require(bigtabulate)
 
 require(ggplot2)
 
+library("TSP")
+library("maps")
+library("sp")
+library("maptools")
 
 
 
@@ -14,16 +18,16 @@ require(ggplot2)
 
 # Original data (TXT)
 # file.data.in <- "C:/Users/Martins Liberts/Documents/DATA/LU/Source/Population.txt"
-# file.data.in <- "~/DATA/LU/Source/Population.txt"
-file.data.in <- "C:/Users/djhurio/DATA/LU/Source/Population.txt"
+file.data.in <- "~/DATA/LU/Source/Population.txt"
+# file.data.in <- "C:/Users/djhurio/DATA/LU/Source/Population.txt"
 
 # Directory for data files
 # dir.data.out <- "C:/Users/Martins Liberts/Documents/DATA/LU/Work"
-# dir.data.out <- "~/DATA/LU/Work"
-dir.data.out <- "C:/Users/djhurio/DATA/LU/Work"
+dir.data.out <- "~/DATA/LU/Work"
+# dir.data.out <- "C:/Users/djhurio/DATA/LU/Work"
 
-# dir.maps <- "~/Dropbox/LU/Darbs/Simulation/050_Simulation/Maps"
-dir.maps <- "C:/Users/djhurio/Dropbox/LU/Darbs/Simulation/050_Simulation/Maps"
+dir.maps <- "~/Dropbox/LU/Darbs/Simulation/050_Simulation/Maps"
+# dir.maps <- "C:/Users/djhurio/Dropbox/LU/Darbs/Simulation/050_Simulation/Maps"
 
 
 
@@ -31,15 +35,22 @@ dir.maps <- "C:/Users/djhurio/Dropbox/LU/Darbs/Simulation/050_Simulation/Maps"
 
 setwd(dir.data.out)
 
-pop <- read.big.matrix(file.data.in,
- header = TRUE,
- type = "integer",
- sep = "\t",
- backingfile = "pop.bin",
- descriptor = "pop.desc")
+# pop <- read.big.matrix(file.data.in,
+#  header = TRUE,
+#  type = "integer",
+#  sep = "\t",
+#  backingfile = "pop.bin",
+#  descriptor = "pop.desc")
+
+pop <- as.big.matrix(as.matrix(read.delim(file.data.in)), type = "integer", backingfile = "pop.bin", descriptorfile = "pop.desc")
+head(pop)
+
+class(pop[1,1])
+
+rm(pop)
 
 
-
+gc()
 
 
 ### Create frame.p
@@ -421,11 +432,6 @@ dev.off()
 
 # TSP
 
-library("TSP")
-library("maps")
-library("sp")
-library("maptools")
-
 setwd(dir.data.out)
 
 load("frame.h.Rdata")
@@ -472,3 +478,5 @@ path_line <- SpatialLines(list(Lines(list(Line(geo[t,])), ID = "1")))
 plot(path_line, add = TRUE, col = "black")
 points(geo[c(head(t, 1), tail(t, 1)),], pch = 19, col = "black")
 
+
+### END ###
