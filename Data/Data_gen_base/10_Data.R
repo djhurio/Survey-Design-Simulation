@@ -33,12 +33,6 @@ require(cluster)
 # Original data (TXT)
 file.data.in <- "~/DATA/LU/Source/Population.txt"
 
-# Directory for data files
-dir.data.out <- "~/DATA/LU/Work"
-
-# Maps
-dir.maps <- "~/DATA/LU/Maps"
-
 
 ### Functions
 
@@ -106,6 +100,10 @@ load("pop.Rdata")
 
 head(pop)
 N <- nrow(pop)
+N
+
+head(pop)
+sapply(pop, function(x) sum(is.na(x)))
 
 # frame.p <- big.matrix(N,
 #                       ncol(pop.orig) + 11,
@@ -247,6 +245,8 @@ var.pop.h <- c("H_ID",
 
 pop.h <- pop[pop$P_ID == 1, var.pop.h]
 
+head(pop.h)
+test.df(pop.h)
 
 # s <- sample(1:nrow(pop.h), 1000)
 # 
@@ -271,6 +271,7 @@ pop.h <- pop[pop$P_ID == 1, var.pop.h]
 head(pop.h)
 
 M <- nrow(pop.h)
+M
 
 
 # PSU.coord <- aggregate(pop.h[, c("coord_x_p", "coord_y_p")], pop.h["iec2010"], mean)
@@ -345,10 +346,11 @@ PSU <- PSU.info(pop.h[c("iec2010", "coord_x_p", "coord_y_p")])
 names(PSU)[1] <- "iec2010"
 names(PSU)[4] <- "max.dist"
 head(PSU)
+test.df(PSU)
 
 PSU$strata <- floor(PSU$iec2010 / 1e5)
 head(PSU)
-
+test.df(PSU)
 
 head(pop.h)
 head(PSU)
@@ -356,9 +358,15 @@ head(PSU)
 dist <- merge(pop.h[c("H_ID", "iec2010", "strata", "coord_x_p", "coord_y_p")],
               PSU[c("iec2010", "x.c", "y.c")])
 
+nrow(dist) == nrow(pop.h)
+
 head(dist)
+test.df(dist)
 
 dist$dist <- sqrt((dist$coord_x_p - dist$x.c)^2 + (dist$coord_y_p - dist$y.c)^2)
+head(dist)
+test.df(dist)
+
 
 plot.circles(PSU[, c(2,3,4)])
 plot.circles(PSU[PSU[, "strata"] == 1, c(2,3,4)])
@@ -384,7 +392,7 @@ hist(dist[dist$strata == 3 & dist$dist < 3e3, "dist"])
 hist(dist[dist$strata == 4, "dist"])
 hist(dist[dist$strata == 4 & dist$dist < 20e3, "dist"])
 
-lim <- c(3e3, 3e3, 3e3, 20e3)
+lim <- c(5e3, 5e3, 5e3, 20e3)
 
 t <- dist$dist < lim[dist$strata]
 table(t)
@@ -405,9 +413,11 @@ M - length(H_ID_keep)
 head(pop.h)
 PSU <- PSU.info(pop.h[pop.h$H_ID %in% H_ID_keep, c("iec2010", "coord_x_p", "coord_y_p")])
 head(PSU)
+test.df(PSU)
 
 PSU$strata <- floor(PSU$clust / 1e5)
 head(PSU)
+test.df(PSU)
 
 plot.circles(PSU[, c(2,3,4)])
 plot.circles(PSU[PSU[, "strata"] == 1, c(2,3,4)])
@@ -419,10 +429,13 @@ plot.circles(PSU[PSU[, "strata"] == 4, c(2,3,4)])
 pop.h <- pop.h[pop.h$H_ID %in% H_ID_keep, ]
 M - nrow(pop.h)
 M <- nrow(pop.h)
+test.df(pop.h)
 
 # Test
 PSU <- PSU.info(pop.h[c("iec2010", "coord_x_p", "coord_y_p")])
 PSU$strata <- floor(PSU$clust / 1e5)
+head(PSU)
+test.df(PSU)
 
 plot.circles(PSU[, c(2,3,4)])
 plot.circles(PSU[PSU[, "strata"] == 1, c(2,3,4)])
@@ -438,7 +451,8 @@ pop <- pop[pop$H_ID %in% H_ID_keep, ]
 N - nrow(pop)
 N <- nrow(pop)
 
-
+head(pop)
+test.df(pop)
 
 
 save(pop, file = "pop.Rdata")
@@ -456,25 +470,42 @@ load("pop.Rdata")
 load("pop.h.Rdata")
 
 N <- nrow(pop)
+N
 M <- nrow(pop.h)
+M
 
 head(pop)
 head(pop.h)
 
+test.df(pop)
+test.df(pop.h)
+
+sum(is.na(pop.h[, "strata"]))
+sum(is.na(pop.h[, "iec2010"]))
+
 frame.PSU <- aggregate(rep(1, M), list(pop.h[, "strata"], pop.h[, "iec2010"]), sum)
 names(frame.PSU) <- c("strata", "iec2010", "size")
 head(frame.PSU)
+test.df(frame.PSU)
+
+M - sum(frame.PSU$size)
 
 coord.PSU <- aggregate(pop.h[c("coord_x_p", "coord_y_p")], pop.h["iec2010"], mean)
 names(coord.PSU)[2:3] <- c("x_PSU", "y_PSU")
 head(coord.PSU)
+test.df(coord.PSU)
 
 
 frame.PSU$const <- 1
-head(frame.PSU)
 
-frame.PSU <- merge(frame.PSU, coord.PSU)
-head(frame.PSU)
+test.df(frame.PSU)
+test.df(coord.PSU)
+
+nrow(frame.PSU)
+nrow(coord.PSU)
+
+frame.PSU <- merge(frame.PSU, coord.PSU, all = T)
+test.df(frame.PSU)
 
 nrow(frame.PSU)
 
@@ -488,7 +519,7 @@ tmp <- aggregate(rep(1, M), list(pop.h[, "strata"], pop.h[, "iec2010"], pop.h[, 
 names(tmp) <- c("strata", "iec2010", "raj", "size")
 names(tmp)
 nrow(tmp)
-head(tmp)
+test.df(tmp)
 
 tmp <- tmp[order(tmp$iec2010, -tmp$size), ]
 
@@ -498,9 +529,11 @@ head(tmp)
 names(tmp) <- c("iec2010", "raj")
 head(tmp)
 
-frame.PSU <- merge(frame.PSU, tmp)
-head(frame.PSU)
+frame.PSU <- merge(frame.PSU, tmp, all = T)
+test.df(frame.PSU)
 nrow(frame.PSU)
+sum(frame.PSU$size)
+
 
 plot(frame.PSU$x_PSU, frame.PSU$y_PSU, pch = 20, cex=.5, asp = 1, col = as.factor(frame.PSU$raj))
 
@@ -510,6 +543,9 @@ tab <- aggregate(frame.PSU[, c("const", "size")], list(frame.PSU$raj), sum)
 head(tab)
 names(tab)[1:2] <- c("raj", "count.iec")
 head(tab)
+test.df(tab)
+colSums(tab[2:3])
+
 
 tab$count.int <- trunc(tab$size / 20e3) + 1
 head(tab)
@@ -525,6 +561,7 @@ head(tab)
 
 # Test
 R <- 1
+set.seed(20120315)
 tmp <- pam(frame.PSU[frame.PSU$raj == R, c("x_PSU", "y_PSU")], 11, stand=F)
 plot(frame.PSU$x_PSU[frame.PSU$raj == R],
      frame.PSU$y_PSU[frame.PSU$raj == R],
@@ -536,26 +573,28 @@ head(frame.PSU)
 
 int <- frame.PSU[c("iec2010", "raj")]
 int$int.ID <- NA
-head(int)
+test.df(int)
 
 a <- 0
 for (R in tab$raj) {
+  set.seed(R)
   tmp <- pam(frame.PSU[frame.PSU$raj == R, c("x_PSU", "y_PSU")],
              tab$count.int[tab$raj == R], stand = F)
   int[int$raj == R, "int.ID"] <- tmp$clustering + a
   a <- a + tab$count.int[tab$raj == R]
 }
 
-head(int)
+test.df(int)
 table(int$int.ID)
 table(int$raj, int$int.ID)
 
-head(frame.PSU)
-head(int)
+test.df(frame.PSU)
+test.df(int)
 
-frame.PSU <- merge(frame.PSU, int)
-head(frame.PSU)
+frame.PSU <- merge(frame.PSU, int, all = T)
+test.df(frame.PSU)
 nrow(frame.PSU)
+sum(frame.PSU$size)
 
 tab[tab$count.int > 1,]
 
@@ -565,18 +604,20 @@ tab[tab$count.int > 1,]
 # plot(x$x_PSU, x$y_PSU, pch = 20, cex=.5, col = x$int.ID, asp = 1)
 
 
-head(frame.PSU)
+test.df(frame.PSU)
 
 frame.int <- aggregate(frame.PSU[c("x_PSU", "y_PSU")], frame.PSU[c("raj", "int.ID")], mean)
 names(frame.int)[3:4] <- c("x_int", "y_int")
-head(frame.int)
+test.df(frame.int)
 
 plot(frame.int$x_int, frame.int$y_int, pch = 20, asp = 1)
 
 
 
-head(frame.PSU)
-head(frame.int)
+test.df(frame.PSU)
+test.df(frame.int)
+
+sum(frame.PSU$size)
 
 save(frame.PSU, file = "frame.PSU.Rdata")
 save(frame.int, file = "frame.int.Rdata")
@@ -588,27 +629,62 @@ save(frame.int, file = "frame.int.Rdata")
 
 #################### Add int.ID to pop and pop.h
 
-setwd(dir.data.out)
+setwd(dir.data)
 
 load("frame.PSU.Rdata")
-head(frame.PSU)
+test.df(frame.PSU)
 
 load("pop.Rdata")
 load("pop.h.Rdata")
 
-head(pop)
-head(pop.h)
-
+test.df(pop)
+test.df(pop.h)
 
 tmp <- frame.PSU[c("iec2010", "int.ID")]
 
-pop <- merge(pop, tmp)
-pop.h <- merge(pop.h, tmp)
+nrow(pop)
+pop <- merge(pop, tmp, all = T)
+nrow(pop)
+
+nrow(pop.h)
+pop.h <- merge(pop.h, tmp, all = T)
+nrow(pop.h)
+
+
+# Sort
 
 head(pop)
 head(pop.h)
 
+pop <- pop[order(pop$strata, pop$iec2010, pop$H_ID, pop$P_ID), ]
+pop.h <- pop.h[order(pop.h$strata, pop.h$iec2010, pop.h$H_ID), ]
 
+test.df(pop)
+test.df(pop.h)
+
+
+# Add casenum
+
+head(pop)
+head(pop.h)
+
+class(pop)
+class(pop.h)
+
+pop <- data.frame(casenum = 1:nrow(pop), pop)
+pop.h <- data.frame(casenum = 1:nrow(pop.h), pop.h)
+
+rownames(pop) <- NULL
+rownames(pop.h) <- NULL
+
+head(pop)
+head(pop.h)
+
+tail(pop)
+tail(pop.h)
+
+class(pop)
+class(pop.h)
 
 
 ##############
@@ -619,6 +695,12 @@ head(pop.h)
 
 frame.p.df <- pop
 frame.h.df <- pop.h
+
+nrow(frame.p.df)
+nrow(frame.h.df)
+
+test.df(frame.p.df)
+test.df(frame.h.df)
 
 save(frame.p.df, file = "frame.p.Rdata")
 save(frame.h.df, file = "frame.h.Rdata")
@@ -637,8 +719,10 @@ frame.p <- big.matrix(N, ncol(frame.p.df),
                       dimnames = list(NULL, colnames(frame.p.df)))
 
 frame.p[,] <- as.matrix(frame.p.df)
-head(frame.p)
+flush(frame.p)
 
+head(frame.p)
+nrow(frame.p)
 
 
 head(frame.h.df)
@@ -652,6 +736,8 @@ frame.h <- big.matrix(M, ncol(frame.h.df),
                       dimnames = list(NULL, colnames(frame.h.df)))
 
 frame.h[,] <- as.matrix(frame.h.df)
+flush(frame.h)
+
 head(frame.h)
 
 
@@ -779,4 +865,29 @@ plot(path_line, add = TRUE, col = "black")
 points(geo[c(head(t, 1), tail(t, 1)),], pch = 19, col = "black")
 
 
-### END ###
+### Testing result
+
+setwd(dir.data.out)
+
+load("frame.p.Rdata")
+frame.p <- attach.big.matrix("frame.p.desc")
+head(frame.p)
+test.df(frame.p.df)
+nrow(frame.p)
+nrow(frame.p.df)
+
+load("frame.h.Rdata")
+frame.h <- attach.big.matrix("frame.h.desc")
+head(frame.h)
+test.df(frame.h.df)
+nrow(frame.h)
+nrow(frame.h.df)
+
+load("frame.PSU.Rdata")
+test.df(frame.PSU)
+nrow(frame.PSU)
+sum(frame.PSU$size)
+
+load("frame.int.Rdata")
+test.df(frame.int)
+nrow(frame.int)

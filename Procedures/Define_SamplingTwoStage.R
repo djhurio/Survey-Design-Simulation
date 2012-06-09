@@ -4,16 +4,16 @@
 # Initial version
 
 SamplingTwoStage <- function(frame.PSU,
-  frame.SSU,
-  frame.TSU,
-  name.weight.s1 = ".dw1",
-  name.weight.s2 = ".dw2",
-  name.weight = ".dw",
-  name.week = "week",
-  name.PSU,
-  name.SSU,
-  name.strata,
-  param) {
+                             frame.SSU,
+                             frame.TSU,
+                             name.weight.s1 = ".dw1",
+                             name.weight.s2 = ".dw2",
+                             name.weight = ".dw",
+                             name.week = "week",
+                             name.PSU,
+                             name.SSU,
+                             name.strata,
+                             param) {
   
   ### Libs
   require(bigmemory)
@@ -72,20 +72,32 @@ SamplingTwoStage <- function(frame.PSU,
 	
 	# Function nemesis
 	nemesis <- function(s, A, b, W, d, Q, w, M, hi, add) {
-		sample.step <- Q/W + (1 + d)/A/W
-		sample.PSU <- data.frame(strata = s, b = b,	i = rep(1:A, w), week = rep(1:w, each=A))
-		sample.PSU$a <- (hi + (b-1)*(1+(1 + d)/A/W)/2 + (sample.PSU$i-1)*(1+delta)/A +
-			(sample.PSU$week-1)*sample.step) %% 1
-		sample.PSU$x <- sin(2*pi*sample.PSU$a) / 2 / pi
-		sample.PSU$y <- cos(2*pi*sample.PSU$a) / 2 / pi
-		sample.PSU$A <- sample.PSU$a * M + add
-		return(sample.PSU)
+
+    sample.step <- Q / W + (1 + d) / A / W
+		
+    sample.PSU <- data.frame(strata = s,
+                             b = b,
+                             i = rep(1:A, w),
+                             week = rep(1:w, each=A))
+		
+    sample.PSU$a <- (hi + 
+      (b - 1) * (1 + (1 + d) / A / W) / 2 +
+      (sample.PSU$i - 1) * (1 + d) / A +
+			(sample.PSU$week - 1) * sample.step) %% 1
+		
+    sample.PSU$x <- sin(2 * pi * sample.PSU$a) / 2 / pi
+		sample.PSU$y <- cos(2 * pi * sample.PSU$a) / 2 / pi
+		
+    sample.PSU$A <- sample.PSU$a * M + add
+		
+    return(sample.PSU)
 	}
 
 
 	# Random number
 	param$hi <- runif(nrow(param))
-	# Add
+
+  # Add
 	param$add <- cumsum(param$M) - param$M
 
 	# Function for param.2
@@ -95,112 +107,123 @@ SamplingTwoStage <- function(frame.PSU,
 	param.2 <- do.call(rbind, lapply(1:max(param$B), fun.tmp1))
 	param.2 <- param.2[order(param.2$s, param.2$b), ]
 	rownames(param.2) <- NULL
-	param.2
+  #	param.2
 
 	# Sampling
 	s.1 <- mapply(nemesis,
-		s = param.2$s,
-		A = param.2$A,
-		W = param.2$W,
-		d = param.2$d,
-		Q = param.2$Q,
-		w = param.2$w,
-		M = param.2$M,
-		hi = param.2$hi,
-		add = param.2$add,
-		b = param.2$b,
-		SIMPLIFY = F)
+                s = param.2$s,
+                A = param.2$A,
+                W = param.2$W,
+                d = param.2$d,
+                Q = param.2$Q,
+                w = param.2$w,
+                M = param.2$M,
+                hi = param.2$hi,
+                add = param.2$add,
+                b = param.2$b,
+                SIMPLIFY = F)
+  #head(s.1)
 
 	# Sample file as data.frame
 	s.2 <- do.call(rbind, s.1)
-	head(s.2)
+	#head(s.2)
 
 
 	# frame.PSU
-	head(frame.PSU)
+	#head(frame.PSU)
 	frame.PSU[, "cum.size"] <- cumsum(frame.PSU[, "size"])
 	frame.PSU[, "a"] <- frame.PSU[, "cum.size"] - frame.PSU[, "size"]
 	frame.PSU[, "b"] <- frame.PSU[, "cum.size"]
-	head(frame.PSU)
+	#head(frame.PSU)
 
 	
 	### Selecting of PSUs
 
 	# List of sampling points
 	s.3 <- s.2$A
-	head(s.3)
+	#head(s.3)
 
 
 	### Function to select PSUs by sampling points
 	f.sel <- function(a, b, x) {
-		a <- as.vector(a)
-		b <- as.vector(b)
+		a <- unlist(a)
+		b <- unlist(b)
 		x <- as.numeric(x[1])
 		n <- length(a)
 		return((1:n)[x > a & x < b])
 	}
 
 	# Indexes of sampled PSUs
-	s.4 <- sapply(s.3, f.sel, a = frame.PSU$a, b = frame.PSU$b)
-	head(s.4)
-	head(s.2)
+	s.4 <- unlist(sapply(s.3, f.sel, a = frame.PSU$a, b = frame.PSU$b))
+	#head(s.4)
+	#head(s.2)
 
-	# PSU sample
+  if (length(s.4) != nrow(s.2))
+    stop("Kļūda s.4 vai s.2 -- nav vienāds garums")
+  
+  # PSU sample
 	s.5 <- data.frame(frame.PSU[s.4, ], s.2)
-	nrow(s.5)
-	head(s.5)
+	#nrow(s.5)
+	#head(s.5)
 
-	# if (length(unique(s.5[, name.PSU])) < nrow(s.5)) stop("Dublicate in PSU sample")
-	if (length(unique(s.5[, name.PSU])) < nrow(s.5)) return(NULL)
+	if (length(unique(s.5[, name.PSU])) < nrow(s.5))
+    stop("Dublicate in PSU sample")
+	#if (length(unique(s.5[, name.PSU])) < nrow(s.5)) return(NULL)
 
 	# PSU sample (IDs only)
 	s.6 <- s.5[, name.PSU]
-	class(s.6)
-	head(s.6)
-	head(sort(s.6))
+	#class(s.6)
+	#head(s.6)
+	#head(sort(s.6))
 
-	param
+	#param
 	param$total.m <- param$A * param$B * param$w
-	param
-	sum(param$total.m * param$m)
+	#param
+	#sum(param$total.m * param$m)
 
-	head(frame.PSU)
+	#head(frame.PSU)
 	frame.PSU$sampled <- as.numeric(frame.PSU[, name.PSU] %in% s.6)
 	frame.PSU$m <- param$m[frame.PSU[, name.strata]] * frame.PSU$sampled
-  head(frame.PSU)
-	sum(frame.PSU$m)
+  #head(frame.PSU)
+	#sum(frame.PSU$m)
 
 	frame.PSU[, name.weight.s1] <- param$M[frame.PSU[, name.strata]] /
-		(frame.PSU$size * param$total.m[frame.PSU[, name.strata]]) * frame.PSU$sampled
+		(frame.PSU$size * param$total.m[frame.PSU[, name.strata]]) *
+    frame.PSU$sampled
 
-	head(frame.PSU)
-	sum(frame.PSU$sampled)
-	sum(frame.PSU[, name.weight.s1])
+	#head(frame.PSU)
+	#sum(frame.PSU$sampled)
+	#sum(frame.PSU[, name.weight.s1])
 
 
 	### Second stage sampling
 
-	sample.TSU <- SamplingClusterStr(frame.TSU, frame.SSU, frame.PSU$m, name.weight.s2,
-		name.SSU, name.PSU)
-	head(sample.TSU)
-	# length(unique(sample.TSU$H_ID))
+	sample.TSU <- SamplingClusterStr(frame.TSU,
+                                   frame.SSU,
+                                   frame.PSU$m,
+                                   name.weight.s2,
+                                   name.SSU,
+                                   name.PSU)
+	#head(sample.TSU)
+	#length(unique(sample.TSU$H_ID))
 
 	sample.TSU <- merge(sample.TSU, frame.PSU[, c(name.PSU, name.weight.s1)])
-	head(sample.TSU)
+	#head(sample.TSU)
 
-	sample.TSU[, name.weight] <- sample.TSU[, name.weight.s1] * sample.TSU[, name.weight.s2]
-	sum(sample.TSU[, name.weight])
+	sample.TSU[, name.weight] <- sample.TSU[, name.weight.s1] *
+    sample.TSU[, name.weight.s2]
+	#sum(sample.TSU[, name.weight])
   
   
   ### Add week
   
-  head(s.5)
+  #head(s.5)
   s.week <- s.5[, c(name.PSU, "week")]
-  head(s.week)
+  #head(s.week)
   
-  nrow(sample.TSU)
+  #nrow(sample.TSU)
   sample.TSU <- merge(sample.TSU, s.week)
-  nrow(sample.TSU)
+  #nrow(sample.TSU)
 
   names(sample.TSU)[ncol(sample.TSU)] <- name.week
 	
@@ -213,19 +236,18 @@ SamplingTwoStage <- function(frame.PSU,
 ### Dev area ###
 ################
 
-
+# # ### Reset
+# # setwd(projwd)
+# # rm(list = ls())
+# # gc()
+# # source(".Rprofile")
+# 
+# 
 # ### Libs
 # library(bigmemory)
 # library(bigtabulate)
 # library(biganalytics)
-# 
 # library(rbenchmark)
-# 
-# ### Workdir
-# #if (.Platform$OS.type == "unix") dir = "/home/djhurio/temp" else dir = "C:/DATA/LU/Results"
-# # dir.work <- "C:/Users/Martins Liberts/Documents/DATA/LU/Work"
-# dir.work <- "~/DATA/LU/Work"
-# dir.proc <- "~/Dropbox/LU/Darbs/Simulation/050_Simulation/20_Procedures"
 # 
 # 
 # ### Proc
@@ -236,7 +258,7 @@ SamplingTwoStage <- function(frame.PSU,
 # 
 # ### DATA
 # 
-# setwd(dir.work)
+# setwd(dir.data)
 # 
 # frame.p <- attach.big.matrix("frame.p.desc")
 # frame.h <- attach.big.matrix("frame.h.desc")
@@ -245,40 +267,95 @@ SamplingTwoStage <- function(frame.PSU,
 # head(frame.h)
 # 
 # load("frame.PSU.Rdata")
-# ls()
-# head(frame.PSU)
+# test.df(frame.PSU)
 # table(frame.PSU$strata)
+# 
+# sum(frame.PSU$size) == nrow(frame.h)
 # 
 # 
 # 
 # ### Sample design parameters
 # 
-# head(frame.PSU)
-# M <- sum(frame.PSU$size)
+# N <- nrow(frame.p)
+# N
 # 
-# M.h <- aggregate(frame.PSU["size"], frame.PSU["strata"], sum)[, 2]
+# M <- nrow(frame.h)
+# M
+# 
+# M.h <- as.vector(bigtable(frame.h, "strata"))
 # M.h
-# cumsum(M.h)
-# cumsum(M.h) - M.h
+# sum(M.h)
+# sum(M.h) == M
 # 
 # max.PSU.size.h <- aggregate(frame.PSU["size"], frame.PSU["strata"], max)[, 2]
+# max.PSU.size.h
 # 
-# # delta <- max.PSU.size.h / M.h
 # delta <- 1 / max.PSU.size.h
 # delta
 # 
+# weeks <- 13
 # 
+# 
+# ### Test 1
 # sampl.des.par <- data.frame(s = 1:4,
-#   A = 8,
-#   B = c(1, rep(2, 3)),
-#   W = 13,
-#   d = delta,
-#   Q = 0,
-#   w = 13,
-#   M = M.h,
-#   m = c(10, 7, 8, 9))
+#                             A = 8,
+#                             B = c(1, 2, 2, 2),
+#                             W = 13,
+#                             d = delta,
+#                             Q = 0,
+#                             w = weeks,
+#                             M = M.h,
+#                             m = c(10, 7, 8, 9))
 # 
 # sampl.des.par
+# m <- sum(sampl.des.par$A * sampl.des.par$B * sampl.des.par$w * sampl.des.par$m)
+# m
+# 
+# s1 <- SamplingTwoStage(frame.PSU, frame.h, frame.p,
+#                        ".dw1", ".dw2", ".dw", "week",
+#                        "iec2010", "H_ID", "strata",
+#                        sampl.des.par)
+# head(s1)
+# nrow(s1)
+# length(unique(s1$H_ID))
+# length(unique(s1$H_ID)) == m
+# 
+# 
+# ### Test 2
+# sampl.des.par <- data.frame(s = 1:4,
+#                             A = 1,
+#                             B = 1,
+#                             W = 12,
+#                             d = delta,
+#                             Q = 4,
+#                             w = 12,
+#                             M = M.h,
+#                             m = 10)
+# 
+# sampl.des.par
+# m <- sum(sampl.des.par$A * sampl.des.par$B * sampl.des.par$w * sampl.des.par$m)
+# m
+# 
+# s1 <- SamplingTwoStage(frame.PSU, frame.h, frame.p,
+#                        ".dw1", ".dw2", ".dw", "week",
+#                        "iec2010", "H_ID", "strata",
+#                        sampl.des.par)
+# head(s1)
+# nrow(s1)
+# length(unique(s1$H_ID))
+# length(unique(s1$H_ID)) == m
+# 
+# 
+# 
+# 
+# n <- round(m * N / M)
+# n
+# 
+# m.h <- round(m * M.h / M)  # Proportional sample allocation
+# m.h
+# sum(m.h)
+# sum(m.h) == m
+# 
 # 
 # 
 # ### Temp param
@@ -300,26 +377,35 @@ SamplingTwoStage <- function(frame.PSU,
 # 
 # ### Testing
 # 
-# s1 <- SamplingTwoStage(frame.PSU = frame.PSU,
-#   frame.SSU = frame.h,
-#   frame.TSU = frame.p,
-#   name.weight.s1 = ".dw1",
-#   name.weight.s2 = ".dw2",
-#   name.weight = ".dw",
-#   name.week = "week",
-#   name.PSU = "iec2010",
-#   name.SSU = "H_ID",
-#   name.strata = "strata",
-#   param = sampl.des.par)
+# set.seed(1)
 # 
-# s1 <- SamplingTwoStage(frame.PSU, frame.h, frame.p, ".dw1", ".dw2", ".dw", "week", "iec2010", "H_ID",
-#  "strata", sampl.des.par)
+# # s1 <- SamplingTwoStage(frame.PSU = frame.PSU,
+# #   frame.SSU = frame.h,
+# #   frame.TSU = frame.p,
+# #   name.weight.s1 = ".dw1",
+# #   name.weight.s2 = ".dw2",
+# #   name.weight = ".dw",
+# #   name.week = "week",
+# #   name.PSU = "iec2010",
+# #   name.SSU = "H_ID",
+# #   name.strata = "strata",
+# #   param = sampl.des.par)
 # 
+# s1 <- SamplingTwoStage(frame.PSU, frame.h, frame.p,
+#                        ".dw1", ".dw2", ".dw", "week",
+#                        "iec2010", "H_ID", "strata",
+#                        sampl.des.par)
 # head(s1)
 # nrow(s1)
+# length(unique(s1$H_ID))
 # 
 # table(s1$.dw)
 # sum(s1$.dw)
+# 
+# N.h <- as.vector(bigtable(frame.p, "strata"))
+# N.h
+# 
+# cbind(N.h, tapply(s1$.dw, s1$strat, sum))
 # 
 # table(s1$week)
 # 
