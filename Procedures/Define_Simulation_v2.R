@@ -212,9 +212,90 @@
 # 
 
 
+### Ver04
 ### Nested loop
 
-Sim.4 <- function(fun, arg, I = 5, name = "res", print = F, log = T, seed = 1:I) {
+# Sim.4 <- function(fun, arg, I = 5,
+#                   name = "res",
+#                   print = F,
+#                   log = T,
+#                   seed = 1:I) {
+#   
+#   require(foreach)
+#   require(doMC)
+#   
+#   registerDoMC()
+#   
+#   # Argument type convertion
+#   
+#   fun <- as.character(fun)[1]
+#   arg <- arg
+#   I <- as.integer(I)[1]
+#   name <- as.character(name)[1]
+#   print <- as.logical(print)[1]
+#   log <- as.logical(log)[1]
+#   
+#   # Testing
+#   if (I<=0) stop("I has to be 1 or larger")
+#   if (length(seed) != I) stop("Wrong length of seed")
+#   
+#   # Test run
+#   test <- eval(call(fun, arg[1]))
+#   m <- length(test)
+#   
+#   cat("Simulation name:", name, "\n")
+#   cat("Number of iterations:", I, "\n")
+#   
+#   t1 <- Sys.time()
+#   
+#   filename <- paste(name, t1)
+#   
+#   R <- foreach(a = arg, .combine = rbind, .inorder = F) %:%
+#     foreach(i = 1L:I, .combine = rbind, .inorder = F) %dopar% {
+#       if (log) cat(as.character(Sys.time()), ", ",
+#                    i, " of ", I, ", ", round(i/I*100, 1), "%\n",
+#                    file = paste(filename, ".log", sep = ""),
+#                                 sep = "", append = T)
+#       set.seed(seed[i])
+#       tr <- try(eval(call(fun, a)), T)
+#       if (class(tr) == "try-error")
+#         res <- data.frame(t1, name, i, seed[i], tr[[1]], matrix(NA, 1, m))
+#       else res <- data.frame(t1, name, i, seed[i], NA, tr)
+#       colnames(res) <- paste("v", 1:(5+m), sep = "")
+#       res
+#   }
+#   
+#   t2 <- Sys.time()
+#   time.run <- as.numeric(t2 - t1, units="secs")
+#   
+#   colnames(R) <- c("timestamp", "name", "i", "seed", "err", names(test))
+#   rownames(R) <- NULL
+#   
+#   assign(name, R)
+#   save(list = name, file = paste(filename, ".Rdata", sep=""))
+#   
+#   cat("Total time:", time.run, "\n")
+#   cat("Average time:", time.run / I, "\n")
+#   
+#   if (print) {
+#     cat("Rows in results", nrow(R), "ieraksti", "\n")
+#     cat("First results:", "\n")
+#     print(head(R))
+#   }
+#   
+#   return(list(R, time.run))
+# }
+
+
+
+### Ver05
+### Option for seed - on/off
+
+Sim <- function(fun, arg, I = 5,
+                name = "res",
+                print = F,
+                log = T,
+                seed = NA) {
   
   require(foreach)
   require(doMC)
@@ -232,7 +313,7 @@ Sim.4 <- function(fun, arg, I = 5, name = "res", print = F, log = T, seed = 1:I)
   
   # Testing
   if (I<=0) stop("I has to be 1 or larger")
-  if (length(seed) != I) stop("Wrong length of seed")
+  if (!is.na(seed) & length(seed) != I) stop("Wrong length of seed")
   
   # Test run
   test <- eval(call(fun, arg[1]))
@@ -247,15 +328,24 @@ Sim.4 <- function(fun, arg, I = 5, name = "res", print = F, log = T, seed = 1:I)
   
   R <- foreach(a = arg, .combine = rbind, .inorder = F) %:%
     foreach(i = 1L:I, .combine = rbind, .inorder = F) %dopar% {
-      if (log) cat(as.character(Sys.time()), ", ", i, " of ", I, ", ", round(i/I*100, 1), "%\n",
-                   file = paste(filename, ".log", sep = ""), sep = "", append = T)
-      set.seed(seed[i])
+      if (log) cat(as.character(Sys.time()), ", ",
+                   i, " of ", I, ", ", round(i/I*100, 1), "%\n",
+                   file = paste(filename, ".log", sep = ""),
+                   sep = "", append = T)
+      
+      if (!is.na(seed)) set.seed(seed[i])
+      
       tr <- try(eval(call(fun, a)), T)
-      if (class(tr) == "try-error") res <- data.frame(t1, name, i, seed[i], tr[[1]], matrix(NA, 1, m))
-      else res <- data.frame(t1, name, i, seed[i], NA, tr)
+      
+      if (class(tr) == "try-error")
+        res <- data.frame(t1, name, i, seed[i], tr[[1]],
+                          matrix(NA, 1, m)) else
+        res <- data.frame(t1, name, i, seed[i], NA, tr)
+      
       colnames(res) <- paste("v", 1:(5+m), sep = "")
+      
       res
-  }
+    }
   
   t2 <- Sys.time()
   time.run <- as.numeric(t2 - t1, units="secs")
@@ -277,8 +367,6 @@ Sim.4 <- function(fun, arg, I = 5, name = "res", print = F, log = T, seed = 1:I)
   
   return(list(R, time.run))
 }
-
-
 
 
 

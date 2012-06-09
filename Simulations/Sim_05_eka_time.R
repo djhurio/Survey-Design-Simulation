@@ -163,6 +163,11 @@ design.4 <- expression(SamplingTwoStage(frame.PSU, frame.h, frame.p,
                                         "iec2010", "H_ID", "strata",
                                         sampl.des.par))
 
+
+
+
+#####
+
 run.SRS <- function(n = 50) {
   s <- eval(design.1)
   n.p <- nrow(s)
@@ -224,15 +229,15 @@ setwd(dir.tmp)
 
 I <- 1
 
-Sim.4("run.SRS", 100, I, "t.SRS", T, T)[[1]]
-Sim.4("run.SRS", c(100, 200), I, "t.SRS", T, T)[[1]]
-Sim.4("run.SRS", seq(100, 300, 100), I, "t.SRS", T, T)[[1]]
+Sim("run.SRS", 100, I, "t.SRS", T, T)[[1]]
+Sim("run.SRS", c(100, 200), I, "t.SRS", T, T)[[1]]
+Sim("run.SRS", seq(100, 300, 100), I, "t.SRS", T, T)[[1]]
 
-Sim.4("run.Clust", 100, I, "t.SRS", T, T)[[1]]
-Sim.4("run.Clust", c(100, 200), I, "t.SRS", T, T)[[1]]
-Sim.4("run.Clust", seq(100, 300, 100), I, "t.SRS", T, T)[[1]]
+Sim("run.Clust", 100, I, "t.SRS", T, T)[[1]]
+Sim("run.Clust", c(100, 200), I, "t.SRS", T, T)[[1]]
+Sim("run.Clust", seq(100, 300, 100), I, "t.SRS", T, T)[[1]]
 
-Sim.4("run.TwoStage", 6032, I, "t.SRS", T, T, seed = 2)[[1]]
+Sim("run.TwoStage", 6032, I, "t.SRS", T, T, seed = 2)[[1]]
 
 
 ss.h <- seq(200, 10e3, 200)
@@ -241,13 +246,13 @@ ss.p <- round(ss.h * N/M)
 ss.h
 ss.p
 
-t.time.sim1 <- Sim.4("run.SRS", ss.p, I, "t.SRS", T, T)
+t.time.sim1 <- Sim("run.SRS", ss.p, I, "t.SRS", T, T)
 t.time.sim1[[2]] / I
 
-t.time.sim2 <- Sim.4("run.Clust", ss.h, I, "t.Clust", T, T)
+t.time.sim2 <- Sim("run.Clust", ss.h, I, "t.Clust", T, T)
 t.time.sim2[[2]] / I
 
-t.time.sim3 <- Sim.4("run.TwoStage", 6032, I, "t.Clust", T, T, seed = 2)
+t.time.sim3 <- Sim("run.TwoStage", 6032, I, "t.Clust", T, T, seed = 2)
 t.time.sim3[[2]] / I
 
 c(t.time.sim1[[2]], t.time.sim2[[2]], t.time.sim3[[2]]) / I
@@ -269,9 +274,9 @@ setwd(dir.tmp)
 
 I <- 5
 
-t.time.sim1 <- Sim.4("run.SRS", ss.p, I, "t.SRS", T, T)
-t.time.sim2 <- Sim.4("run.Clust", ss.h, I, "t.Clust", T, T)
-t.time.sim3 <- Sim.4("run.TwoStage", 6032, I, "t.Clust", T, T)
+t.time.sim1 <- Sim("run.SRS", ss.p, I, "t.SRS", T, T)
+t.time.sim2 <- Sim("run.Clust", ss.h, I, "t.Clust", T, T)
+t.time.sim3 <- Sim("run.TwoStage", 6032, I, "t.Clust", T, T)
 
 t.time.sim <- sum(t.time.sim1[[2]], t.time.sim2[[2]], t.time.sim3[[2]]) / I
 t.time.sim
@@ -290,11 +295,11 @@ I
 
 setwd(dir.work)
 
-res1 <- Sim.4("run.SRS", ss.p, I, "SRS", T, T)
-res2 <- Sim.4("run.Clust", ss.h, I, "Clust", T, T)
-res3 <- Sim.4("run.TwoStage", 6032, I, "TwoStage", T, T)
+res1 <- Sim("run.SRS", ss.p, I, "SRS", T, T)
+res2 <- Sim("run.Clust", ss.h, I, "Clust", T, T)
+res3 <- Sim("run.TwoStage", 6032, I, "TwoStage", T, T)
 
-# res3 <- Sim.4("run.TwoStage", 6032, 10, "TwoStage", T, T)
+# res3 <- Sim("run.TwoStage", 6032, 10, "TwoStage", T, T)
 
 
 head(res1[[1]])
@@ -546,9 +551,9 @@ setwd(dir.tmp)
 n_SRS <- 2890
 n_Clust <- 1300
 
-s <- eval(design.1)
-head(s)
-nrow(s)
+# s <- eval(design.1)
+# head(s)
+# nrow(s)
 
 estimation <- function(s, n) {
   n.p <- nrow(s)
@@ -610,23 +615,23 @@ setwd(dir.tmp)
 
 I <- 1
 
-Sim.4("run.SRS", 100, I, "t.SRS", T, T)[[1]]
-Sim.4("run.SRS", n_SRS, I, "t.SRS", T, T)[[1]]
+Sim("run.SRS", 100, I, "t.SRS", T, T)[[1]]
+Sim("run.SRS", n_SRS, I, "t.SRS", T, T)[[1]]
 
-Sim.4("run.Clust", 100, I, "t.Clust", T, T)[[1]]
-Sim.4("run.Clust", n_Clust, I, "t.Clust", T, T)[[1]]
+Sim("run.Clust", 100, I, "t.Clust", T, T)[[1]]
+Sim("run.Clust", n_Clust, I, "t.Clust", T, T)[[1]]
 
-Sim.4("run.TwoStage", n_Clust, I, "t.TwoStage", T, T, seed = 1)[[1]]
-Sim.4("run.TwoStage", n_Clust, I, "t.TwoStage", T, T, seed = 2)[[1]]
+Sim("run.TwoStage", n_Clust, I, "t.TwoStage", T, T, seed = 1)[[1]]
+Sim("run.TwoStage", n_Clust, I, "t.TwoStage", T, T, seed = 2)[[1]]
 
 
-t.time.sim1 <- Sim.4("run.SRS", n_SRS, I, "t.SRS", T, T)
+t.time.sim1 <- Sim("run.SRS", n_SRS, I, "t.SRS", T, T)
 t.time.sim1[[2]] / I
 
-t.time.sim2 <- Sim.4("run.Clust", n_Clust, I, "t.Clust", T, T)
+t.time.sim2 <- Sim("run.Clust", n_Clust, I, "t.Clust", T, T)
 t.time.sim2[[2]] / I
 
-t.time.sim3 <- Sim.4("run.TwoStage", 6032, I, "t.TwoStage", T, T, seed = 2)
+t.time.sim3 <- Sim("run.TwoStage", 6032, I, "t.TwoStage", T, T, seed = 2)
 t.time.sim3[[2]] / I
 
 c(t.time.sim1[[2]], t.time.sim2[[2]], t.time.sim3[[2]]) / I
@@ -648,14 +653,15 @@ setwd(dir.tmp)
 
 I <- 5
 
-t.time.sim1 <- Sim.4("run.SRS", n_SRS, I, "t.SRS", T, T)
-t.time.sim2 <- Sim.4("run.Clust", n_Clust, I, "t.Clust", T, T)
-t.time.sim3 <- Sim.4("run.TwoStage", 6032, I, "t.TwoStage", T, T)
+t.time.sim1 <- Sim("run.SRS", n_SRS, I, "t.SRS", T, T)
+t.time.sim2 <- Sim("run.Clust", n_Clust, I, "t.Clust", T, T)
+t.time.sim3 <- Sim("run.TwoStage", n_Clust, I, "t.TwoStage", T, T)
 
-t.time.sim <- sum(t.time.sim1[[2]], t.time.sim2[[2]], t.time.sim3[[2]]) / I
+t.time.sim <- sum(t.time.sim1[[2]], t.time.sim2[[2]], t.time.sim3[[2]]) /
+  (I + 1)
 t.time.sim
 
-time.available <- 4  ### in hours
+time.available <- .75  ### in hours
 
 # Rounding base
 base <- 10
@@ -667,11 +673,16 @@ I
 ### RUN ###
 ###########
 
-setwd(dir.res)
+# setwd(dir.res)
+setwd(dir.tmp)
 
-res1 <- Sim.4("run.SRS", n_SRS, I, "SRS", T, T)
-res2 <- Sim.4("run.Clust", n_Clust, I, "Clust", T, T)
-res3 <- Sim.4("run.TwoStage", 6032, I, "TwoStage", T, T)
+t1 <- Sys.time()
+res1 <- Sim("run.SRS", n_SRS, I, "SRS", T, T)
+res2 <- Sim("run.Clust", n_Clust, I, "Clust", T, T)
+res3 <- Sim("run.TwoStage", n_Clust, I, "TwoStage", T, T)
+t2 <- Sys.time()
+
+t2 - t1
 
 head(res1[[1]])
 head(res2[[1]])
@@ -679,9 +690,20 @@ head(res3[[1]])
 
 
 
+### Save
+
+# setwd(dir.res)
+# 
+# Sys.time()
+# 
+# save(res1, res2, res3,
+#      file = paste("Sim_Results_", Sys.time(),".Rdata", sep=""))
 
 
-### Results
+
+
+
+### Load
 
 setwd(dir.res)
 
@@ -695,9 +717,23 @@ tv
 # load("TwoStage 2012-05-17 20:13:50.Rdata")
 
 # 2012-05-26
-load("SRS 2012-05-26 10:07:39.Rdata")
-load("Clust 2012-05-26 10:56:28.Rdata")
-load("TwoStage 2012-05-26 12:16:28.Rdata")
+# load("SRS 2012-05-26 10:07:39.Rdata")
+# load("Clust 2012-05-26 10:56:28.Rdata")
+# load("TwoStage 2012-05-26 12:16:28.Rdata")
+
+# 2012-06-09
+# load("SRS 2012-06-09 13:10:10.Rdata")
+# load("Clust 2012-06-09 13:17:40.Rdata")
+# load("TwoStage 2012-06-09 13:25:43.Rdata")
+
+# load("SRS 2012-06-09 15:44:23.Rdata")
+# load("Clust 2012-06-09 16:00:03.Rdata")
+# load("TwoStage 2012-06-09 16:16:31.Rdata")
+
+load("SRS 2012-06-09 18:17:21.Rdata")
+load("Clust 2012-06-09 18:30:47.Rdata")
+load("TwoStage 2012-06-09 18:45:17.Rdata")
+
 
 test.df(SRS)
 test.df(Clust)
@@ -718,6 +754,8 @@ head(res)
 ncol(res)
 
 aggregate(res[6:ncol(res)], res["name"], mean, na.rm = T)
+tv
+
 aggregate(res[6:ncol(res)], res["name"], sd, na.rm = T)
 aggregate(res[6:ncol(res)], res["name"], min, na.rm = T)
 aggregate(res[6:ncol(res)], res["name"], max, na.rm = T)
@@ -736,13 +774,30 @@ v <- c("sum.empl", "sum.unempl", "sum.inact", "sum.act",
        "r.act", "r.empl", "r.unempl",
        "dist", "time")
 
-gr <- lapply(X = v, FUN = "gr.den", data = res, tv = tv[1, ],
-             fill = "name", color = "name")
+gr0 <- lapply(X = v, FUN = "gr.den", data = res, tv = tv[1, ],
+              fill = "name", color = "name",
+              adjust = 1/2, title = "adjust = 1/2")
+gr0
 
-gr
+gr1 <- lapply(X = v, FUN = "gr.den", data = res, tv = tv[1, ],
+              fill = "name", color = "name",
+              adjust = 1, title = "adjust = 1")
+gr1
+
+gr2 <- lapply(X = v, FUN = "gr.den", data = res, tv = tv[1, ],
+              fill = "name", color = "name",
+              adjust = 2, title = "adjust = 2")
+gr2
 
 qplot(sum.empl, data=res, geom="histogram")
 
 pdf(paste("plots_estim_", Sys.time(), ".pdf", sep = ""), paper = "a4r")
-gr
+gr0
+gr1
+gr2
 dev.off()
+
+I
+
+qplot(sum.empl, data = res, geom="freqpoly", binwidth = 1000, 
+      color = name)

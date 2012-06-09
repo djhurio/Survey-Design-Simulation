@@ -21,16 +21,20 @@
 ### Ver02
 
 gr.den <- function(x, data, tv = NULL,
-                   fill = NULL, linetype = NULL, color = NULL) {
+                   fill = NULL, linetype = NULL, color = NULL,
+                   adjust = 1,
+                   title = "Plot") {
   
   x <- as.character(x)[1]
   
   data <- data[!is.na(data[, x]), ]
   
   ggplot(data,
-         aes_string(x = x, fill = fill, linetype = linetype, color = color)) +
-    geom_density(alpha = 0.2) +
+    aes_string(x = x, fill = fill, linetype = linetype, color = color)) +
+    geom_density(alpha = 0.2, adjust = adjust) +
     geom_vline(xintercept = tv[1, x], color = "red", size = .5) +
     xlab(x) + 
-    theme_bw()
+    theme_bw() + 
+    opts(title = title)
 }
+
