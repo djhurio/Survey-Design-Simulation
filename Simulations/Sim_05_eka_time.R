@@ -125,15 +125,15 @@ sampl.des.par <- data.frame(s = 1:4,
 
 
 # Testing smaller sample size
-sampl.des.par <- data.frame(s = 1:4,
-                            A = 5,
-                            B = 1,
-                            W = 13,
-                            d = delta,
-                            Q = 0,
-                            w = weeks,
-                            M = M.h,
-                            m = 5)
+# sampl.des.par <- data.frame(s = 1:4,
+#                             A = 5,
+#                             B = 1,
+#                             W = 13,
+#                             d = delta,
+#                             Q = 0,
+#                             w = weeks,
+#                             M = M.h,
+#                             m = 5)
 
 sampl.des.par
 
@@ -174,7 +174,7 @@ run.SRS <- function(n = 50) {
   n.h <- length(unique(s$H_ID))
   d <- vTrip.fast.1(s[c("int.ID", ".week", "coord_x_p", "coord_y_p")],
                     frame.int[c("int.ID", "x_int", "y_int")])
-  time <- Cost(d, 40, n.h, n.p, 2/6, 1/6)
+  time <- Cost(d, 20, n.h, n.p, 2/6, 1/6)
   res <- data.frame(n = n, count.P = n.p, count.H = n.h, dist = d / 1e3,
                     time = time)
   return(res)
@@ -186,7 +186,7 @@ run.Clust <- function(n = 50) {
   n.h <- length(unique(s$H_ID))
   d <- vTrip.fast.1(s[c("int.ID", ".week", "coord_x_p", "coord_y_p")],
                     frame.int[c("int.ID", "x_int", "y_int")])
-  time <- Cost(d, 40, n.h, n.p, 2/6, 1/6)
+  time <- Cost(d, 20, n.h, n.p, 2/6, 1/6)
   res <- data.frame(n = n, count.P = n.p, count.H = n.h, dist = d / 1e3,
                     time = time)
   return(res)
@@ -198,7 +198,7 @@ run.TwoStage <- function(n = 50) {
   n.h <- length(unique(s$H_ID))
   d <- vTrip.fast.1(s[c("int.ID", ".week", "coord_x_p", "coord_y_p")],
                     frame.int[c("int.ID", "x_int", "y_int")])
-  time <- Cost(d, 40, n.h, n.p, 2/6, 1/6)
+  time <- Cost(d, 20, n.h, n.p, 2/6, 1/6)
   res <- data.frame(n = n, count.P = n.p, count.H = n.h, dist = d / 1e3,
                     time = time)
   return(res)
@@ -237,7 +237,8 @@ Sim("run.Clust", 100, I, "t.SRS", T, T)[[1]]
 Sim("run.Clust", c(100, 200), I, "t.SRS", T, T)[[1]]
 Sim("run.Clust", seq(100, 300, 100), I, "t.SRS", T, T)[[1]]
 
-Sim("run.TwoStage", 6032, I, "t.SRS", T, T, seed = 2)[[1]]
+# Sim("run.TwoStage", 6032, I, "t.SRS", T, T, seed = 2)[[1]]
+Sim("run.TwoStage", 6032, I, "t.SRS", T, T)[[1]]
 
 
 ss.h <- seq(200, 10e3, 200)
@@ -247,12 +248,14 @@ ss.h
 ss.p
 
 t.time.sim1 <- Sim("run.SRS", ss.p, I, "t.SRS", T, T)
+t.time.sim1[[1]]
 t.time.sim1[[2]] / I
 
 t.time.sim2 <- Sim("run.Clust", ss.h, I, "t.Clust", T, T)
+t.time.sim2[[1]]
 t.time.sim2[[2]] / I
 
-t.time.sim3 <- Sim("run.TwoStage", 6032, I, "t.Clust", T, T, seed = 2)
+t.time.sim3 <- Sim("run.TwoStage", 6032, I, "t.Clust", T, T)
 t.time.sim3[[2]] / I
 
 c(t.time.sim1[[2]], t.time.sim2[[2]], t.time.sim3[[2]]) / I
@@ -278,10 +281,11 @@ t.time.sim1 <- Sim("run.SRS", ss.p, I, "t.SRS", T, T)
 t.time.sim2 <- Sim("run.Clust", ss.h, I, "t.Clust", T, T)
 t.time.sim3 <- Sim("run.TwoStage", 6032, I, "t.Clust", T, T)
 
-t.time.sim <- sum(t.time.sim1[[2]], t.time.sim2[[2]], t.time.sim3[[2]]) / I
+t.time.sim <- sum(t.time.sim1[[2]], t.time.sim2[[2]], t.time.sim3[[2]]) /
+  (I + 1)
 t.time.sim
 
-time.available <- 3  ### in hours
+time.available <- 4  ### in hours
 
 # Rounding base
 base <- 10
@@ -293,7 +297,7 @@ I
 ### RUN ###
 ###########
 
-setwd(dir.work)
+setwd(dir.tmp)
 
 res1 <- Sim("run.SRS", ss.p, I, "SRS", T, T)
 res2 <- Sim("run.Clust", ss.h, I, "Clust", T, T)
@@ -311,21 +315,27 @@ head(res3[[1]])
 ### Results 1 ###
 #################
 
-# 2012-03-22
-
 setwd(dir.res)
 
-load("SRS 2012-03-22 09:21:24.Rdata")
-load("Clust 2012-03-22 10:36:31.Rdata")
-load("TwoStage 2012-03-22 12:00:44.Rdata")
+# 2012-03-22
+# load("SRS 2012-03-22 09:21:24.Rdata")
+# load("Clust 2012-03-22 10:36:31.Rdata")
+# load("TwoStage 2012-03-22 12:00:44.Rdata")
 
 # SRS <- res1[[1]]
 # Clust <- res2[[1]]
 # TwoStage <- res3[[1]]
 
+# 2012-06-11
+load("SRS 2012-06-10 16:58:31.Rdata")
+load("Clust 2012-06-10 19:00:00.Rdata")
+load("TwoStage 2012-06-10 21:17:40.Rdata")
+
 test.df(SRS)
 test.df(Clust)
 test.df(TwoStage)
+
+head(TwoStage[!is.na(TwoStage$err), ])
 
 res <- rbind(SRS, Clust, TwoStage)
 
@@ -416,11 +426,11 @@ head(res)
 
 
 
-tab1 <- aggregate(res[c("count.P", "dist", "time")],
+tab1 <- aggregate(res[c("count.P", "count.H", "dist", "time")],
                   list(design = res$name, n = res$n),
                   mean, na.rm = T)
 
-tab2 <- aggregate(res[c("count.P", "dist", "time")],
+tab2 <- aggregate(res[c("count.P", "count.H", "dist", "time")],
                   list(design = res$name, n = res$n),
                   sd, na.rm = T)
 
@@ -455,7 +465,12 @@ plot.dist.sd <- ggplot(tab, aes(count.P.mean, dist.sd)) +
   geom_point(aes(colour = design, size = dist.sd)) +
   theme_bw()
 
-plot.time.mean <- ggplot(tab, aes(count.P.mean, time.mean)) +
+plot.time.mean.P <- ggplot(tab, aes(count.P.mean, time.mean)) +
+  geom_point(aes(colour = design, size = time.sd)) +
+  geom_hline(yintercept = t1, color = "red") +
+  theme_bw()
+
+plot.time.mean.H <- ggplot(tab, aes(count.H.mean, time.mean)) +
   geom_point(aes(colour = design, size = time.sd)) +
   geom_hline(yintercept = t1, color = "red") +
   theme_bw()
@@ -465,9 +480,17 @@ plot.time.sd <- ggplot(tab, aes(count.P.mean, time.sd)) +
   theme_bw()
 
 plot.count.P.sd
+
 plot.dist.mean
 plot.dist.sd
+
 plot.time.mean
+plot.time.mean.H
+
+pdf("plot_time_mean.pdf")
+plot.time.mean.P
+dev.off()
+
 plot.time.sd
 
 # pdf(paste("Plots2 ", Sys.time(), ".pdf", sep=""))
@@ -479,14 +502,7 @@ plot.time.sd
 # dev.off()
 
 
-gr.den <- function(var.name) {
-  var.name <- as.character(var.name)
-  ggplot(data = res_sub, aes_string(x = var.name, color = "name", group = "name")) +
-    geom_density(size = 1) +
-    xlab(var.name)
-}
-
-gr.den("time")
+gr.den("time", data = res_sub, fill = "name", adjust = 2)
 
 ggplot(res[res$name == "SRS", ], aes(n, time)) +
   geom_point(aes(colour = "red")) +
@@ -545,11 +561,11 @@ save(tv, file = "pop.eka_tv.Rdata")
 
 setwd(dir.tmp)
 
-# n_SRS
-# n_Clust
+n_SRS
+n_Clust
 
-n_SRS <- 2890
-n_Clust <- 1300
+# n_SRS <- 2890
+# n_Clust <- 1300
 
 # s <- eval(design.1)
 # head(s)
@@ -560,7 +576,7 @@ estimation <- function(s, n) {
   n.h <- length(unique(s$H_ID))
   d <- vTrip.fast.1(s[c("int.ID", ".week", "coord_x_p", "coord_y_p")],
                     frame.int[c("int.ID", "x_int", "y_int")])
-  time <- Cost(d, 40, n.h, n.p, 2/6, 1/6)
+  time <- Cost(d, 20, n.h, n.p, 2/6, 1/6)
   
   s2 <- extr.data(pop.eka, s$casenum, s$.week, 3, "eka.time")
   s2$empl <- as.integer(s2$eka.time == 1)
@@ -655,13 +671,13 @@ I <- 5
 
 t.time.sim1 <- Sim("run.SRS", n_SRS, I, "t.SRS", T, T)
 t.time.sim2 <- Sim("run.Clust", n_Clust, I, "t.Clust", T, T)
-t.time.sim3 <- Sim("run.TwoStage", n_Clust, I, "t.TwoStage", T, T)
+t.time.sim3 <- Sim("run.TwoStage", 6032, I, "t.TwoStage", T, T)
 
 t.time.sim <- sum(t.time.sim1[[2]], t.time.sim2[[2]], t.time.sim3[[2]]) /
   (I + 1)
 t.time.sim
 
-time.available <- .75  ### in hours
+time.available <- 8  ### in hours
 
 # Rounding base
 base <- 10
@@ -730,9 +746,13 @@ tv
 # load("Clust 2012-06-09 16:00:03.Rdata")
 # load("TwoStage 2012-06-09 16:16:31.Rdata")
 
-load("SRS 2012-06-09 18:17:21.Rdata")
-load("Clust 2012-06-09 18:30:47.Rdata")
-load("TwoStage 2012-06-09 18:45:17.Rdata")
+# load("SRS 2012-06-09 18:17:21.Rdata")
+# load("Clust 2012-06-09 18:30:47.Rdata")
+# load("TwoStage 2012-06-09 18:45:17.Rdata")
+
+load("SRS 2012-06-11 07:55:18.Rdata")
+load("Clust 2012-06-11 09:20:00.Rdata")
+load("TwoStage 2012-06-11 11:46:55.Rdata")
 
 
 test.df(SRS)
@@ -751,10 +771,13 @@ tail(names(res), 3)
 res <- CompEmp(res, tail(names(res), 3))
 head(res)
 
+write.csv(res, "res.txt")
+
 ncol(res)
 
 aggregate(res[6:ncol(res)], res["name"], mean, na.rm = T)
 tv
+
 
 aggregate(res[6:ncol(res)], res["name"], sd, na.rm = T)
 aggregate(res[6:ncol(res)], res["name"], min, na.rm = T)
@@ -773,6 +796,7 @@ nrow(res)
 v <- c("sum.empl", "sum.unempl", "sum.inact", "sum.act",
        "r.act", "r.empl", "r.unempl",
        "dist", "time")
+v
 
 gr0 <- lapply(X = v, FUN = "gr.den", data = res, tv = tv[1, ],
               fill = "name", color = "name",
@@ -786,14 +810,29 @@ gr1
 
 gr2 <- lapply(X = v, FUN = "gr.den", data = res, tv = tv[1, ],
               fill = "name", color = "name",
-              adjust = 2, title = "adjust = 2")
+              adjust = 2, title = "")
 gr2
+
+gr.den("sum.empl", data = res, tv = tv[1, ],
+       fill = "name", color = "name", adjust = 2, title = "")
+gr.den("sum.unempl", data = res, tv = tv[1, ],
+       fill = "name", color = "name", adjust = 2, title = "")
+gr.den("sum.act", data = res, tv = tv[1, ],
+       fill = "name", color = "name", adjust = 2, title = "")
+gr.den("sum.inact", data = res, tv = tv[1, ],
+       fill = "name", color = "name", adjust = 2, title = "")
+gr.den("r.empl", data = res, tv = tv[1, ],
+       fill = "name", color = "name", adjust = 2, title = "")
+gr.den("r.unempl", data = res, tv = tv[1, ],
+       fill = "name", color = "name", adjust = 2, title = "")
+gr.den("r.act", data = res, tv = tv[1, ],
+       fill = "name", color = "name", adjust = 2, title = "")
+
+
 
 qplot(sum.empl, data=res, geom="histogram")
 
-pdf(paste("plots_estim_", Sys.time(), ".pdf", sep = ""), paper = "a4r")
-gr0
-gr1
+pdf("plots_estim_%03d.pdf", onefile = F)
 gr2
 dev.off()
 
