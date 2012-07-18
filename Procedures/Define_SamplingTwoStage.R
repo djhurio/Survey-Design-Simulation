@@ -73,7 +73,7 @@ SamplingTwoStage <- function(frame.PSU,
 	# Function nemesis
 	nemesis <- function(s, A, b, W, d, Q, w, M, hi, add) {
 
-    sample.step <- Q / W + (1 + d) / A / W
+    sample.step <- Q / W + (1 - d) / A / W
 		
     sample.PSU <- data.frame(strata = s,
                              b = b,
@@ -81,8 +81,8 @@ SamplingTwoStage <- function(frame.PSU,
                              week = rep(1:w, each=A))
 		
     sample.PSU$a <- (hi + 
-      (b - 1) * (1 + (1 + d) / A / W) / 2 +
-      (sample.PSU$i - 1) * (1 + d) / A +
+      (b - 1) * (1 + (1 - d) / A / W) / 2 +
+      (sample.PSU$i - 1) * (1 - d) / A +
 			(sample.PSU$week - 1) * sample.step) %% 1
 		
     sample.PSU$x <- sin(2 * pi * sample.PSU$a) / 2 / pi
