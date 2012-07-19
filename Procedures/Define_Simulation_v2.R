@@ -512,8 +512,9 @@ Sim <- function(fun, arg, I = 5,
       tr <- try(do.call(fun, arg[a, ]), T)
       
       if (class(tr) == "try-error")
-        res <- data.frame(t1, name, i, seed[i], arg, tr[[1]], matrix(NA, 1, m)) else
-        res <- data.frame(t1, name, i, seed[i], arg, NA, tr)
+        res <- data.frame(t1, name, i, seed[i], arg[a, ],
+                          tr[[1]], matrix(NA, 1, m)) else
+        res <- data.frame(t1, name, i, seed[i], arg[a, ], NA, tr)
       
       colnames(res) <- paste("v", 1:(4 + ncol(arg) + 1 + m), sep = "")
       
@@ -523,7 +524,8 @@ Sim <- function(fun, arg, I = 5,
   t2 <- Sys.time()
   time.run <- as.numeric(t2 - t1, units="secs")
   
-  colnames(R) <- c("timestamp", "name", "i", "seed", colnames(arg), "err", colnames(test))
+  colnames(R) <- c("timestamp", "name", "i", "seed",
+                   colnames(arg), "err", colnames(test))
   rownames(R) <- NULL
   
   assign(name, R)

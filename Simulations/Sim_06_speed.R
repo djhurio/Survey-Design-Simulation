@@ -236,10 +236,8 @@ arg <- rbind(arg1, arg2, arg3)
 
 
 t.time.sim1 <- Sim(fun = "run", arg = arg, I = I, print = T)
-t.time.sim1[[1]]
-t.time.sim1[[2]] / I / 60
-
 head(t.time.sim1[[1]])
+t.time.sim1[[2]] / I / 60
 
 
 
@@ -257,8 +255,9 @@ t.time.sim1 <- Sim(fun = "run", arg = arg, I = I, print = T)
 
 t.time.sim <- sum(t.time.sim1[[2]]) / (I + 1)
 t.time.sim
+t.time.sim / 60
 
-time.available <- 4  ### in hours
+time.available <- 6  ### in hours
 
 # Rounding base
 base <- 10
@@ -272,10 +271,9 @@ I
 
 setwd(dir.tmp)
 
+I * nrow(arg)
+
 res1 <- Sim(fun = "run", arg = arg, I = I, print = T)
-
-# res3 <- Sim("run.TwoStage", 6032, 10, "TwoStage", T, T)
-
 
 head(res1[[1]])
 
@@ -286,27 +284,11 @@ head(res1[[1]])
 
 setwd(dir.res)
 
-# 2012-03-22
-# load("SRS 2012-03-22 09:21:24.Rdata")
-# load("Clust 2012-03-22 10:36:31.Rdata")
-# load("TwoStage 2012-03-22 12:00:44.Rdata")
+load("res 2012-07-18 21:11:56.Rdata")
 
-# SRS <- res1[[1]]
-# Clust <- res2[[1]]
-# TwoStage <- res3[[1]]
+test.df(res)
 
-# 2012-06-11
-load("SRS 2012-06-10 16:58:31.Rdata")
-load("Clust 2012-06-10 19:00:00.Rdata")
-load("TwoStage 2012-06-10 21:17:40.Rdata")
-
-test.df(SRS)
-test.df(Clust)
-test.df(TwoStage)
-
-head(TwoStage[!is.na(TwoStage$err), ])
-
-res <- rbind(SRS, Clust, TwoStage)
+table(res$err)
 
 head(res)
 names(res)
