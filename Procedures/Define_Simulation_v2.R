@@ -524,8 +524,8 @@ Sim <- function(fun, arg, I = 5,
   t2 <- Sys.time()
   time.run <- as.numeric(t2 - t1, units="secs")
   
-  colnames(R) <- c("timestamp", "name", "i", "seed",
-                   colnames(arg), "err", colnames(test))
+  colnames(R) <- make.names(c("timestamp", "name", "i", "seed",
+                   colnames(arg), "err", colnames(test)), unique = T)
   rownames(R) <- NULL
   
   assign(name, R)
