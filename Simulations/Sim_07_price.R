@@ -12,6 +12,10 @@
 ### Ver06
 # Simulation of different travel speeds
 
+### Ver07
+# Simulation when cost is defined by money
+
+
 ################
 ### Start up ###
 ################
@@ -118,9 +122,7 @@ sum(m.h) == m
 ### Sim functions
 
 d1 <- 'SamplingSRSWeek(frame.p, n, ".dw", weeks = weeks)'
-
 d2 <- 'SamplingClusterWeek(frame.p, frame.h, n, ".dw", "H_ID", weeks = weeks)'
-
 d3 <- 'SamplingTwoStage(frame.PSU, frame.h, frame.p, ".dw1", ".dw2", ".dw", ".week", "iec2010", "H_ID", "strata", sampl.des.par)'
 
 
@@ -132,14 +134,24 @@ d3 <- 'SamplingTwoStage(frame.PSU, frame.h, frame.p, ".dw1", ".dw2", ".dw", ".we
 
 ##### run function
 
-run <- function(code, n, speed, time.int.H, time.int.P) {
+# run <- function(code, n, speed, time.int.H, time.int.P) {
+#   s <- eval(parse(text = code))
+#   n.p <- nrow(s)
+#   n.h <- length(unique(s$H_ID))
+#   d <- vTrip.fast.1(s[c("int.ID", ".week", "coord_x_p", "coord_y_p")],
+#                     frame.int[c("int.ID", "x_int", "y_int")])
+#   time <- Cost(d, speed, n.h, n.p, time.int.H, time.int.P)
+#   res <- data.frame(count.P = n.p, count.H = n.h, dist = d / 1e3, time = time)
+#   return(res)
+# }
+
+run <- function(code, n) {
   s <- eval(parse(text = code))
   n.p <- nrow(s)
   n.h <- length(unique(s$H_ID))
   d <- vTrip.fast.1(s[c("int.ID", ".week", "coord_x_p", "coord_y_p")],
                     frame.int[c("int.ID", "x_int", "y_int")])
-  time <- Cost(d, speed, n.h, n.p, time.int.H, time.int.P)
-  res <- data.frame(count.P = n.p, count.H = n.h, dist = d / 1e3, time = time)
+  res <- data.frame(count.P = n.p, count.H = n.h, dist = d)
   return(res)
 }
 
@@ -171,42 +183,26 @@ I <- 1
 
 ###
 
-ss.h <- seq(200, 10e3, 400)
-ss.p <- round(ss.h * N/M)
+ss.h <- round(seq(800, 10e3, 400) / 13) * 13
+ss.p <- round(ss.h * N/M / 13) * 13
 
 ss.h
 ss.p
 
-speed <- c(20, 30, 40)
+ss.h %% 13
+ss.p %% 13
 
-rep(speed, each = length(ss.p))
-rep(ss.p, times = length(speed))
 
-arg1 <- data.frame(code = d1, n = rep(ss.p, times = length(speed)),
-                   speed = rep(speed, each = length(ss.p)),
-                   time.int.H = 1/3, time.int.P = 1/6,
-                   stringsAsFactors = F)
-
-arg2 <- data.frame(code = d2, n = rep(ss.h, times = length(speed)),
-                   speed = rep(speed, each = length(ss.h)),
-                   time.int.H = 1/3, time.int.P = 1/6,
-                   stringsAsFactors = F)
-
-arg3 <- data.frame(code = d3, n = 6032,
-                   speed = speed, time.int.H = 1/3, time.int.P = 1/6,
-                   stringsAsFactors = F)
+arg1 <- data.frame(code = d1, n = ss.p, stringsAsFactors = F)
+arg2 <- data.frame(code = d2, n = ss.h, stringsAsFactors = F)
+arg3 <- data.frame(code = d3, n = 6032, stringsAsFactors = F)
 
 arg <- rbind(arg1, arg2, arg3)
 
+head(arg)
 nrow(arg)
 
-# arg
-
-
-# t.time.sim1 <- Sim(fun = "run", arg = arg, I = I, print = T)
-# head(t.time.sim1[[1]])
-# t.time.sim1[[2]] / I / 60
-
+arg$n %% 13
 
 
 ################
@@ -225,7 +221,7 @@ t.time.sim <- sum(t.time.sim1[[2]]) / (I)
 t.time.sim
 t.time.sim / 60
 
-time.available <- 6  ### in hours
+time.available <- 5  ### in hours
 
 # Rounding base
 base <- 10
@@ -251,16 +247,24 @@ head(res1[[1]])
 ### Results 1 ###
 #################
 
-setwd(dir.res)
+# res <- res1[[1]]
 
-# load("res 2012-07-19 09:18:44.Rdata")
-load("res 2012-07-19 09:18:44.Rdata")
+setwd(dir.res)
+load("res 2012-09-19 22:36:10.Rdata")
 
 dim(res)
 
 test.df(res)
 
 head(res)
+
+# Errors in data
+head(res[!is.na(res$err), ])
+
+# Remove errors
+nrow(res)
+res <- res[is.na(res$err), ]
+nrow(res)
 
 table(res$timestamp, useNA = "ifany")
 table(res$name, useNA = "ifany")
@@ -294,9 +298,23 @@ head(res)
 
 ### Speed as character
 
-class(res$speed)
-res$speed <- as.character(res$speed)
-class(res$speed)
+# class(res$speed)
+# res$speed <- as.character(res$speed)
+# class(res$speed)
+
+
+### Cost calculation
+
+head(res)
+
+res$dist <- res$dist / 1e3
+
+res$cost.t <- Cost2(trip = res$dist, cons = 8, price.f = 1)
+res$cost.i <- Cost2(n.h = res$count.H, n.p = res$count.P,
+                    price.h = 3, price.p = 1)
+res$cost <- res$cost.t + res$cost.i
+
+head(res)
 
 
 ### TwoStage sampling results
@@ -308,15 +326,16 @@ length(a)
 
 res_TwoStage <- res[a, ]
 head(res_TwoStage)
-table(res_TwoStage$speed)
+# table(res_TwoStage$speed)
 
-dt <- aggregate(res_TwoStage[c("dist", "time")],
-                res_TwoStage[c("speed")], mean)
+dt <- aggregate(res_TwoStage[c("dist", "cost.t", "cost.i", "cost")],
+                res_TwoStage[c("design")], mean)
 
 dt
-class(dt$speed)
 
 ### NAs
+
+head(res)
 
 table(res$design)
 table(is.na(res$n))
@@ -328,8 +347,8 @@ table(is.na(res$n))
 
 #### Average results
 
-res_agg <- aggregate(res[c("dist", "time", "count.P", "count.H")],
-                     res[c("n", "speed", "design")], mean,
+res_agg <- aggregate(res[c("dist", "cost.t", "cost.i", "cost", "count.P", "count.H")],
+                     res[c("n", "design")], mean,
                      na.action = na.pass)
 
 table(res_agg$design)
@@ -339,62 +358,43 @@ dim(res_agg)
 sapply(res_agg, class)
 
 
-res_agg_2 <- aggregate(res[c("dist", "time", "count.P", "count.H")],
-                     res[c("n", "design")], mean,
-                     na.action = na.pass)
-
-table(res_agg_2$design)
-
-head(res_agg_2)
-dim(res_agg_2)
-sapply(res_agg_2, class)
-
-
-
-
 dt
 
-p1 <- ggplot(res_agg_2, aes(x = count.P, y = dist,
-                          shape = design)) +
+p1 <- ggplot(res_agg, aes(x = count.P, y = dist, colour = design)) +
   stat_smooth(method=lm, linetype = "dotted", alpha = .1) +
   geom_point() +
-  geom_hline(aes(yintercept = mean(dt$dist))) +
+  geom_hline(aes(yintercept = dt$dist, colour = dt$design)) +
   theme_bw()
 p1
 
-p2 <- ggplot(res_agg, aes(x = count.P, y = time,
-                          shape = design, colour = speed)) +
-  stat_smooth(method=lm, linetype = "dotted", aes(fill = speed), alpha = .1) +
+p2 <- ggplot(res_agg, aes(x = count.P, y = cost.t, colour = design)) +
+  stat_smooth(method=lm, linetype = "dotted", alpha = .1) +
   geom_point() +
-  geom_hline(aes(yintercept = dt$time, colour = dt$speed)) +
+  geom_hline(aes(yintercept = dt$cost.t, colour = dt$design)) +
   theme_bw()
 p2
+
+p3 <- ggplot(res_agg, aes(x = count.P, y = cost.i, colour = design)) +
+  stat_smooth(method=lm, linetype = "dotted", alpha = .1) +
+  geom_point() +
+  geom_hline(aes(yintercept = dt$cost.i, colour = dt$design)) +
+  theme_bw()
+p3
+
+p4 <- ggplot(res_agg, aes(x = count.P, y = cost, colour = design)) +
+  stat_smooth(method=lm, linetype = "dotted", alpha = .1) +
+  geom_point() +
+  geom_hline(aes(yintercept = dt$cost, colour = dt$design)) +
+  theme_bw()
+p4
 
 head(res_agg)
-class(res_agg$speed)
 
-p2_40 <- ggplot(res_agg[res_agg$speed %in% c("40"), ], aes(x = count.P, y = time,
-                          shape = design, colour = speed)) +
-  stat_smooth(method=lm, linetype = "dotted", aes(fill = speed), alpha = .1) +
-  geom_point() +
-  geom_hline(aes(yintercept = dt$time[dt$speed %in% c("40")],
-        colour = dt$speed)) +
-  theme_bw()
-p2_40
-
-p2_40_30 <- ggplot(res_agg[res_agg$speed %in% c("40", "30"), ], aes(x = count.P, y = time,
-   shape = design, colour = speed)) +
-     stat_smooth(method=lm, linetype = "dotted", aes(fill = speed), alpha = .1) +
-     geom_point() +
-     geom_hline(aes(yintercept = dt$time[dt$speed %in% c("40", "30")],
-                    colour = dt$speed[dt$speed %in% c("40", "30")])) +
-                      theme_bw()
-p2_40_30
-
-
-
-pdf(file = "Plot_count.P_by_time.pdf")
+pdf(file = "Plot_count.P.pdf")
+p1
 p2
+p3
+p4
 dev.off()
 
 
@@ -402,11 +402,11 @@ dev.off()
 # Select sample size for SRS and Clust to have the same cost as TwoSTage
 
 head(res_agg)
-res_agg$group <- paste(res_agg$design, res_agg$speed)
+# res_agg$group <- paste(res_agg$design, res_agg$speed)
 
 dt
 
-a <- lmList(count.P ~ time | group, res_agg,
+a <- lmList(n ~ cost | design, res_agg,
             subset = res_agg$design != "TwoStage")
 coef(a)
 coeff <- as.data.frame(coef(a))
@@ -414,31 +414,23 @@ coeff <- as.data.frame(coef(a))
 colnames(coeff) <- letters[1:2]
 coeff
 
-coeff$TS_time <- dt$time
+coeff$TS_cost <- dt$cost
 coeff
 
-coeff$n <- coeff$a + coeff$b * coeff$TS_time
+coeff$n <- coeff$a + coeff$b * coeff$TS_cost
 coeff
 
-coeff$design <- substr(rownames(coeff), 1, regexpr(" ", rownames(coeff)) - 1)
-coeff
-
-coeff$speed <- substr(rownames(coeff), regexpr(" ", rownames(coeff)) + 1,
-                      nchar(rownames(coeff)))
+coeff$design <- rownames(coeff)
 coeff
 
 rownames(coeff) <- NULL
 coeff
 
-n_SRS <- coeff[coeff$design == "SRSWeek", c("speed", "n")]
+n_SRS <- coeff[coeff$design == "SRSWeek", c("n")]
 n_SRS
 
-n_Clust <- data.frame(speed = coeff$speed[coeff$design == "ClusterWeek"],
-                      n = coeff$n[coeff$design == "ClusterWeek"] / N * M,
-                      stringsAsFactors = F)
+n_Clust <- coeff[coeff$design == "ClusterWeek", c("n")]
 n_Clust
-n_Clust[,1]
-n_Clust[,2]
 
 
 setwd(dir.res)
@@ -461,18 +453,16 @@ load("sample.sizes.Rdata")
 
 setwd(dir.tmp)
 
-estimation <- function(s, speed, time.int.H, time.int.P) {
+estimation <- function(s) {
   n.p <- nrow(s)
   n.h <- length(unique(s$H_ID))
   d <- vTrip.fast.1(s[c("int.ID", ".week", "coord_x_p", "coord_y_p")],
                     frame.int[c("int.ID", "x_int", "y_int")])
-  time <- Cost(d, speed, n.h, n.p, time.int.H, time.int.P)
   
   s2 <- extr.data(pop.eka, s$casenum, s$.week, 4, "eka.time")
   s2$empl <- as.integer(s2$eka.time == 1)
   s2$unempl <- as.integer(s2$eka.time == 2)
   s2$inact <- as.integer(s2$eka.time == 3)
-  head(s2)
 
   param <- rbind(c("sum", "empl", NA),
                  c("sum", "unempl", NA),
@@ -483,7 +473,6 @@ estimation <- function(s, speed, time.int.H, time.int.P) {
   res <- data.frame(count.P = n.p,
                     count.H = n.h,
                     dist = d / 1e3,
-                    time = time,
                     est)
 
   return(res)
@@ -492,26 +481,19 @@ estimation <- function(s, speed, time.int.H, time.int.P) {
 
 ### run.2() function
 
-run.2 <- function(code, n, speed, time.int.H, time.int.P) {
+run.2 <- function(code, n) {
   s <- eval(parse(text = code))
-  return(estimation(s, speed, time.int.H, time.int.P))
+  return(estimation(s))
 }
 
 
-run.2(d1, 50, 20, 1/3, 1/6)
-run.2(d1, n_SRS$n[1], n_SRS$speed[1], 1/3, 1/6)
-run.2(d1, n_SRS$n[2], n_SRS$speed[2], 1/3, 1/6)
-run.2(d1, n_SRS$n[3], n_SRS$speed[3], 1/3, 1/6)
+run.2(d1, 50)
+run.2(d1, n_SRS)
 
-run.2(d2, 50, 20, 1/3, 1/6)
-run.2(d2, n_Clust$n[1], n_Clust$speed[1], 1/3, 1/6)
-run.2(d2, n_Clust$n[2], n_Clust$speed[2], 1/3, 1/6)
-run.2(d2, n_Clust$n[3], n_Clust$speed[3], 1/3, 1/6)
+run.2(d2, 50)
+run.2(d2, n_Clust)
 
-# run.TwoStage(6032)
-run.2(d3, 6032, n_Clust$speed[1], 1/3, 1/6)
-run.2(d3, 6032, n_Clust$speed[2], 1/3, 1/6)
-run.2(d3, 6032, n_Clust$speed[3], 1/3, 1/6)
+run.2(d3, 6032)
 
 
 ### Test
@@ -520,11 +502,8 @@ setwd(dir.tmp)
 
 designs <- c(d1, d2, d3)
 
-arg <- data.frame(code = rep(designs, each = 3),
-                  n = c(n_SRS$n, n_Clust$n, rep(6032, 3)),
-                  speed = rep(c(20, 30, 40), 3),
-                  time.int.H = 1/3,
-                  time.int.P = 1/6,
+arg <- data.frame(code = designs,
+                  n = c(n_SRS, n_Clust, 6032),
                   stringsAsFactors = F)
 arg
 
