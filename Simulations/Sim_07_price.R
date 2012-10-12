@@ -151,7 +151,7 @@ run <- function(code, n) {
   n.h <- length(unique(s$H_ID))
   d <- vTrip.fast.1(s[c("int.ID", ".week", "coord_x_p", "coord_y_p")],
                     frame.int[c("int.ID", "x_int", "y_int")])
-  res <- data.frame(count.P = n.p, count.H = n.h, dist = d)
+  res <- data.frame(count.P = n.p, count.H = n.h, dist = d / 1e3)
   return(res)
 }
 
@@ -296,20 +296,13 @@ res$code <- NULL
 head(res)
 
 
-### Speed as character
-
-# class(res$speed)
-# res$speed <- as.character(res$speed)
-# class(res$speed)
-
-
 ### Cost calculation
 
 head(res)
 
-res$dist <- res$dist / 1e3
+res$dist <- res$dist / 1e3 * 4.2
 
-res$cost.t <- Cost2(trip = res$dist, cons = 8, price.f = 1)
+res$cost.t <- Cost2(trip = res$dist, cons = 9.6, price.f = .760)
 res$cost.i <- Cost2(n.h = res$count.H, n.p = res$count.P,
                     price.h = 3, price.p = 1)
 res$cost <- res$cost.t + res$cost.i
@@ -390,7 +383,7 @@ p4
 
 head(res_agg)
 
-pdf(file = "Plot_count.P.pdf")
+pdf(file = "Plot_count.P_phase1.pdf")
 p1
 p2
 p3
@@ -496,6 +489,7 @@ run.2(d2, n_Clust)
 run.2(d3, 6032)
 
 
+
 ### Test
 
 setwd(dir.tmp)
@@ -509,7 +503,7 @@ arg
 
 I <- 1
 
-Sim(fun = "run.2", arg = arg[1, ], I = I, print = T)[[1]]
+# Sim(fun = "run.2", arg = arg[1, ], I = I, print = T)[[1]]
 Sim(fun = "run.2", arg = arg, I = I, print = T)[[1]]
 
 
@@ -526,15 +520,15 @@ I <- 5
 t.time.sim <- Sim(fun = "run.2", arg = arg, I = I, log = F)[[2]] / I
 t.time.sim
 
-# time.available <- 5  ### in hours
+time.available <- 5  ### in hours
 
 # Rounding base
-# base <- 10
+base <- 10
 
-# I <- floor(time.available * 3600 / t.time.sim / base) * base
-# I
+I <- floor(time.available * 3600 / t.time.sim / base) * base
+I
 
-I <- 5e3
+I <- 1e3
 time.sim <- t.time.sim * I
 time.sim / 60 / 60
 
@@ -630,50 +624,26 @@ setwd(dir.res)
 load("pop.eka_tv.Rdata")
 tv
 
-# # 2012-05-17
-# load("SRS 2012-05-17 19:41:08.Rdata")
-# load("Clust 2012-05-17 19:53:31.Rdata")
-# load("TwoStage 2012-05-17 20:13:50.Rdata")
-
-# 2012-05-26
-# load("SRS 2012-05-26 10:07:39.Rdata")
-# load("Clust 2012-05-26 10:56:28.Rdata")
-# load("TwoStage 2012-05-26 12:16:28.Rdata")
-
-# 2012-06-09
-# load("SRS 2012-06-09 13:10:10.Rdata")
-# load("Clust 2012-06-09 13:17:40.Rdata")
-# load("TwoStage 2012-06-09 13:25:43.Rdata")
-
-# load("SRS 2012-06-09 15:44:23.Rdata")
-# load("Clust 2012-06-09 16:00:03.Rdata")
-# load("TwoStage 2012-06-09 16:16:31.Rdata")
-
-# load("SRS 2012-06-09 18:17:21.Rdata")
-# load("Clust 2012-06-09 18:30:47.Rdata")
-# load("TwoStage 2012-06-09 18:45:17.Rdata")
-
-# load("SRS 2012-06-11 07:55:18.Rdata")
-# load("Clust 2012-06-11 09:20:00.Rdata")
-# load("TwoStage 2012-06-11 11:46:55.Rdata")
-
-# 2012.07.29
-# load("Sim_Results_II_2012-07-30 06:51:27.Rdata")
-load("Sim_Results_II_2012-08-07 07:42:01.Rdata")
+load("Sim_Results_II_2012-09-23 22:11:22.Rdata")
 res <- res[[1]]
 
 head(res)
 names(res)
 table(res$name)
 
-names(res)
-tail(names(res), 3)
-
-res <- CompEmp(res, tail(names(res), 3))
-head(res)
 
 
-### design
+
+### Errors
+
+table(res$err)
+
+nrow(res)
+res <- res[is.na(res$err), ]
+nrow(res)
+
+
+### Design
 
 a <- regexpr("(", res$code, fixed = T)
 head(a)
@@ -689,11 +659,37 @@ head(res)
 res$code <- NULL
 head(res)
 
-### Speed as character
 
-class(res$speed)
-res$speed <- as.character(res$speed)
-class(res$speed)
+
+
+
+### Cost calculation
+
+head(res)
+
+res$dist <- res$dist * 4.2
+head(res)
+
+res$cost.t <- Cost2(trip = res$dist, cons = 9.6, price.f = .760)
+res$cost.i <- Cost2(n.h = res$count.H, n.p = res$count.P,
+                    price.h = 3, price.p = 1)
+res$cost <- res$cost.t + res$cost.i
+
+head(res)
+
+
+
+
+### Estimates of parameters
+
+names(res)
+
+res <- CompEmp(res, c("sum.empl", "sum.unempl", "sum.inact"))
+head(res)
+
+
+
+
 
 
 ### Write out
@@ -702,16 +698,17 @@ class(res$speed)
 ncol(res)
 head(res)
 
-varnames <- colnames(res)[7:(ncol(res) - 1)][-3]
+varnames <- c("count.P", "count.H", "dist", "cost.t", "cost.i", "cost",
+              "N", "n.1", "sum.empl", "sum.unempl", "sum.inact",
+              "sum.pop", "sum.act", "r.act", "r.empl", "r.unempl")
 varnames
 
-aggregate(res[varnames], res[c("speed", "design")], mean, na.rm = T)
 tv
 
-
-aggregate(res[varnames], res[c("design", "speed")], sd, na.rm = T)
-aggregate(res[varnames], res[c("design", "speed")], min, na.rm = T)
-aggregate(res[varnames], res[c("design", "speed")], max, na.rm = T)
+aggregate(res[varnames], res[c("design")], mean, na.rm = T)
+aggregate(res[varnames], res[c("design")], sd, na.rm = T)
+aggregate(res[varnames], res[c("design")], min, na.rm = T)
+aggregate(res[varnames], res[c("design")], max, na.rm = T)
 
 
 names(res)
@@ -725,104 +722,20 @@ tv
 
 nrow(res)
 
-# gr.den("r.unempl", data = res, tv = tv[1, ], fill = "name", color = "name")
-# gr.den("time", data = res, tv = tv[1, ], fill = "name", color = "name")
-# gr.den("dist", data = res, tv = tv[1, ], fill = "name", color = "name")
-
-
-v <- c("sum.empl", "sum.unempl", "sum.inact", "sum.act",
-       "r.act", "r.empl", "r.unempl",
-       "dist", "time")
-v
-
-# gr0 <- lapply(X = v, FUN = "gr.den", data = res, tv = tv[1, ],
-#               fill = "design", color = "design", linetype = "speed",
-#               adjust = 1/2, title = "adjust = 1/2")
-# gr0
-# 
-# gr1 <- lapply(X = v, FUN = "gr.den", data = res, tv = tv[1, ],
-#               fill = "design", color = "design", linetype = "speed",
-#               adjust = 1, title = "adjust = 1")
-# gr1
-# 
-# gr2 <- lapply(X = v, FUN = "gr.den", data = res, tv = tv[1, ],
-#               fill = "design", color = "design", linetype = "speed",
-#               adjust = 2, title = "")
-# gr2
 
 head(res)
 
+v1 <- c("dist", "cost.t", "cost.i", "cost")
+v2 <- c("sum.pop", "sum.act", "sum.empl", "sum.unempl", "sum.inact",
+        "r.act", "r.empl", "r.unempl")
+v <- c(v1, v2)
+v
 
-# pdf("plots_estim_%03d.pdf", onefile = F)
-pdf("plots_estim_2.pdf", onefile = T)
+gr2 <- lapply(X = v, FUN = "gr.den", data = res, tv = tv[1, ],
+              fill = "design", color = "design",
+              adjust = 2, title = "")
 
-gr.den("time", data = res[res$speed == "20", ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("time", data = res[res$speed == "30", ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("time", data = res[res$speed == "40", ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-
-
-head(res[res$design == "SRSWeek", ])
-
-gr.den("sum.empl", data = res[res$design == "SRSWeek", ], tv = tv[1, ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("sum.empl", data = res[res$design == "ClusterWeek", ], tv = tv[1, ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("sum.empl", data = res[res$design == "TwoStage", ], tv = tv[1, ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("sum.empl", data = res[res$speed == "40", ], tv = tv[1, ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("sum.empl", data = res[res$speed == "30", ], tv = tv[1, ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("sum.empl", data = res[res$speed == "20", ], tv = tv[1, ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("sum.empl", data = res, tv = tv[1, ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("sum.unempl", data = res, tv = tv[1, ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("sum.act", data = res, tv = tv[1, ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("sum.inact", data = res, tv = tv[1, ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("r.empl", data = res, tv = tv[1, ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("r.unempl", data = res, tv = tv[1, ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
-gr.den("r.act", data = res, tv = tv[1, ],
-       fill = "design", color = "design", linetype = "speed",
-       adjust = 2, title = "")
-
+pdf("plots_phase_2.pdf", onefile = T)
+gr2
 dev.off()
 
