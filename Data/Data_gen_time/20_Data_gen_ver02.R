@@ -120,7 +120,8 @@ length(time)
 
 set.seed(20120502)
 gen.pop(eka, TM.cum.list, time,
-        file.name = "pop.eka", extra.col = c("casenum", "H_ID", "P_ID"))
+        file.name = "pop.eka",
+        extra.col = c("casenum", "H_ID", "P_ID", "strata"))
 
 
 
@@ -133,8 +134,11 @@ head(popg)
 
 head(frame.p)
 
-popg[, c("casenum", "H_ID", "P_ID")] <- as.integer(frame.p[, c("casenum","H_ID", "P_ID")])
+popg[, c("casenum", "H_ID", "P_ID", "strata")] <- 
+  as.integer(frame.p[, c("casenum","H_ID", "P_ID", "strata")])
 head(popg)
 
 # Save to file
 flush(popg)
+
+bigtabulate(popg, "strata")

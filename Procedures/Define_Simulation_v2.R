@@ -467,12 +467,13 @@ Sim <- function(fun, arg, I = 5,
                 name = "res",
                 print = F,
                 log = F,
-                seed = NA) {
+                seed = NA,
+                cores = multicore:::detectCores()) {
   
   require(foreach)
   require(doMC)
   
-  registerDoMC()
+  registerDoMC(cores = cores)
   
   # Argument type convertion
   
@@ -494,10 +495,12 @@ Sim <- function(fun, arg, I = 5,
   
   cat("Simulation name:", name, "\n")
   cat("Number of iterations:", I, "\n")
+  cat("Number of cores:", cores, "\n")
   
   t1 <- Sys.time()
   
-  filename <- paste(name, t1)
+  #filename <- paste(name, t1)
+  filename <- name
   
   R <- foreach(a = 1L:nrow(arg), .combine = rbind, .inorder = F) %:%
     foreach(i = 1L:I, .combine = rbind, .inorder = F) %dopar% {
