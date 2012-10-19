@@ -122,7 +122,7 @@ SamplingTwoStage <- function(frame.PSU,
                 add = param.2$add,
                 b = param.2$b,
                 SIMPLIFY = F)
-  #head(s.1)
+  #head(s.1[[1]])
 
 	# Sample file as data.frame
 	s.2 <- do.call(rbind, s.1)
@@ -183,13 +183,24 @@ SamplingTwoStage <- function(frame.PSU,
 
 	#head(frame.PSU)
 	frame.PSU$sampled <- as.numeric(frame.PSU[, name.PSU] %in% s.6)
-	frame.PSU$m <- param$m[frame.PSU[, name.strata]] * frame.PSU$sampled
+  #head(frame.PSU)
+  
+  # (Error)
+  # frame.PSU$m <- param$m[frame.PSU[, name.strata]] * frame.PSU$sampled
+
+  frame.PSU <- merge(frame.PSU, param[c("s", "m", "M", "total.m")],
+                     by.x = name.strata, by.y = "s")
+  frame.PSU$m <- frame.PSU$m * frame.PSU$sampled
   #head(frame.PSU)
 	#sum(frame.PSU$m)
 
-	frame.PSU[, name.weight.s1] <- param$M[frame.PSU[, name.strata]] /
-		(frame.PSU$size * param$total.m[frame.PSU[, name.strata]]) *
-    frame.PSU$sampled
+	# (Error)
+  # frame.PSU[, name.weight.s1] <- param$M[frame.PSU[, name.strata]] /
+	#	(frame.PSU$size * param$total.m[frame.PSU[, name.strata]]) *
+  # frame.PSU$sampled
+  
+  frame.PSU[, name.weight.s1] <- frame.PSU$M /
+    (frame.PSU$size * frame.PSU$total.m) * frame.PSU$sampled
 
 	#head(frame.PSU)
 	#sum(frame.PSU$sampled)
@@ -198,6 +209,9 @@ SamplingTwoStage <- function(frame.PSU,
 
 	### Second stage sampling
 
+  #head(frame.PSU)
+  #head(frame.SSU)
+  
 	sample.TSU <- SamplingClusterStr(frame.TSU,
                                    frame.SSU,
                                    frame.PSU$m,
@@ -236,11 +250,11 @@ SamplingTwoStage <- function(frame.PSU,
 ### Dev area ###
 ################
 
-# # ### Reset
-# # setwd(projwd)
-# # rm(list = ls())
-# # gc()
-# # source(".Rprofile")
+# ### Reset
+# setwd(projwd)
+# rm(list = ls())
+# gc()
+# source(".Rprofile")
 # 
 # 
 # ### Libs
@@ -273,6 +287,33 @@ SamplingTwoStage <- function(frame.PSU,
 # sum(frame.PSU$size) == nrow(frame.h)
 # 
 # 
+# ### Strata selection (if necesary)
+# 
+# strata.selected <- 4
+# 
+# 
+# # frame.p
+# head(frame.p)
+# bigtable(frame.p, "strata")
+# class(frame.p)
+# frame.p <- frame.p[frame.p[, "strata"] %in% strata.selected, ]
+# class(frame.p)
+# 
+# # frame.h
+# head(frame.h)
+# bigtable(frame.h, "strata")
+# class(frame.h)
+# frame.h <- frame.h[frame.h[, "strata"] %in% strata.selected, ]
+# class(frame.h)
+# 
+# # frame.PSU
+# head(frame.PSU)
+# bigtable(frame.PSU, "strata")
+# class(frame.PSU)
+# frame.PSU <- frame.PSU[frame.PSU[, "strata"] %in% strata.selected, ]
+# class(frame.PSU)
+# 
+# 
 # 
 # ### Sample design parameters
 # 
@@ -296,25 +337,57 @@ SamplingTwoStage <- function(frame.PSU,
 # weeks <- 13
 # 
 # 
-# ### Test 1
-# sampl.des.par <- data.frame(s = 1:4,
+# # sampl.des.par <- data.frame(s = 1:4,
+# #                             A = 8,
+# #                             B = c(1, 2, 2, 2),
+# #                             W = 13,
+# #                             d = delta,
+# #                             Q = 0,
+# #                             w = weeks,
+# #                             M = M.h,
+# #                             m = c(10, 7, 8, 9))
+# 
+# sampl.des.par <- data.frame(s = 4,
 #                             A = 8,
-#                             B = c(1, 2, 2, 2),
+#                             B = 2,
 #                             W = 13,
-#                             d = delta,
+#                             d = 0,
 #                             Q = 0,
 #                             w = weeks,
 #                             M = M.h,
-#                             m = c(10, 7, 8, 9))
+#                             m = 9)
 # 
 # sampl.des.par
+# 
 # m <- sum(sampl.des.par$A * sampl.des.par$B * sampl.des.par$w * sampl.des.par$m)
 # m
+# 
+# 
+# 
+# ### Temp param
+# 
+# frame.PSU <- frame.PSU
+# frame.SSU <- frame.h
+# frame.TSU <- frame.p
+# name.weight.s1 <- ".dw1"
+# name.weight.s2 <- ".dw2"
+# name.weight <- ".dw"
+# name.week <- "week"
+# name.PSU <- "iec2010"
+# name.SSU <- "H_ID"
+# name.strata <- "strata"
+# param <- sampl.des.par
+# 
+# 
+# 
+# 
+# ### Testing 1
 # 
 # s1 <- SamplingTwoStage(frame.PSU, frame.h, frame.p,
 #                        ".dw1", ".dw2", ".dw", "week",
 #                        "iec2010", "H_ID", "strata",
 #                        sampl.des.par)
+# 
 # head(s1)
 # nrow(s1)
 # length(unique(s1$H_ID))
@@ -358,24 +431,8 @@ SamplingTwoStage <- function(frame.PSU,
 # 
 # 
 # 
-# ### Temp param
 # 
-# frame.PSU <- frame.PSU
-# frame.SSU <- frame.h
-# frame.TSU <- frame.p
-# name.weight.s1 <- ".dw1"
-# name.weight.s2 <- ".dw2"
-# name.weight <- ".dw"
-# name.week <- "week"
-# name.PSU <- "iec2010"
-# name.SSU <- "H_ID"
-# name.strata <- "strata"
-# param <- sampl.des.par
-# 
-# 
-# 
-# 
-# ### Testing
+# ### Testing 2
 # 
 # set.seed(1)
 # 
@@ -419,4 +476,3 @@ SamplingTwoStage <- function(frame.PSU,
 #   order="relative",
 #   replications=10
 # )
-# 

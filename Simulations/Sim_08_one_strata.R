@@ -23,19 +23,20 @@
 ### Start up ###
 ################
 
-### Clock
-T1 <- Sys.time()
-
-
-
 ### Reset
 setwd(projwd)
 rm(list = ls())
 gc()
 source(".Rprofile")
 
+
+### Clock
+T1 <- Sys.time()
+
+
+
 # Redefine dir.res
-dir.res <- paste(projwd, "Results", "Lauki", sep = "/")
+dir.res <- paste(projwd, "Results", "Strata_3_4", sep = "/")
 
 
 ### Options
@@ -71,7 +72,7 @@ pop.eka <- attach.big.matrix("pop.eka.desc")
 
 
 ### Selection of strata
-strata.selected <- 4
+strata.selected <- 3:4
 
 
 # frame.p
@@ -79,14 +80,18 @@ head(frame.p)
 bigtable(frame.p, "strata")
 class(frame.p)
 frame.p <- frame.p[frame.p[, "strata"] %in% strata.selected, ]
+frame.p[, "casenum"] <- 1:nrow(frame.p)
 class(frame.p)
+head(frame.p)
 
 # frame.h
 head(frame.h)
 bigtable(frame.h, "strata")
 class(frame.h)
 frame.h <- frame.h[frame.h[, "strata"] %in% strata.selected, ]
+frame.h[, "casenum"] <- 1:nrow(frame.h)
 class(frame.h)
+head(frame.h)
 
 # frame.PSU
 head(frame.PSU)
@@ -103,7 +108,13 @@ head(pop.eka)
 bigtable(pop.eka, "strata")
 class(pop.eka)
 pop.eka <- pop.eka[pop.eka[, "strata"] %in% strata.selected, ]
+pop.eka[, "casenum"] <- 1:nrow(pop.eka)
 class(pop.eka)
+head(pop.eka)
+
+head(rownames(pop.eka))
+
+head(pop.eka)
 
 
 
@@ -145,7 +156,7 @@ weeks <- 13
 #                             M = M.h,
 #                             m = c(10, 7, 8, 9))
 
-sampl.des.par <- data.frame(s = 4,
+sampl.des.par <- data.frame(s = strata.selected,
                             A = 8,
                             B = 2,
                             W = 13,
@@ -153,7 +164,7 @@ sampl.des.par <- data.frame(s = 4,
                             Q = 0,
                             w = weeks,
                             M = M.h,
-                            m = 9)
+                            m = 8:9)
 
 sampl.des.par
 
@@ -187,17 +198,6 @@ d3 <- 'SamplingTwoStage(frame.PSU, frame.h, frame.p, ".dw1", ".dw2", ".dw", ".we
 
 ##### run function
 
-# run <- function(code, n, speed, time.int.H, time.int.P) {
-#   s <- eval(parse(text = code))
-#   n.p <- nrow(s)
-#   n.h <- length(unique(s$H_ID))
-#   d <- vTrip.fast.1(s[c("int.ID", ".week", "coord_x_p", "coord_y_p")],
-#                     frame.int[c("int.ID", "x_int", "y_int")])
-#   time <- Cost(d, speed, n.h, n.p, time.int.H, time.int.P)
-#   res <- data.frame(count.P = n.p, count.H = n.h, dist = d / 1e3, time = time)
-#   return(res)
-# }
-
 run <- function(code, n) {
   s <- eval(parse(text = code))
   n.p <- nrow(s)
@@ -211,7 +211,7 @@ run <- function(code, n) {
 
 ### Arguments
 
-ss.h <- round(seq(m/3, m, length.out = 10) / 13) * 13
+ss.h <- round(seq(m/10, m, length.out = 30) / 13) * 13
 ss.p <- round(ss.h * N/M / 13) * 13
 
 ss.h
@@ -238,6 +238,11 @@ arg$n %% 13
 setwd(dir.tmp)
 
 I <- 1
+
+test1 <- Sim(fun = "run", arg = arg1, I = I, print = T, log = F, cores = 2)
+test2 <- Sim(fun = "run", arg = arg2, I = I, print = T, log = F, cores = 2)
+test3 <- Sim(fun = "run", arg = arg3, I = I, print = T, log = F, cores = 2)
+
 
 
 ################
@@ -283,14 +288,14 @@ I <- 1
 
 setwd(dir.res)
 
-I <- 500
+I <- 250
 
 I
 I * nrow(arg)
 
 t1 <- Sys.time()
-res1 <- Sim(fun = "run", arg = arg, I = I, print = F, log = T, cores = 2,
-            name = "results_phase1")
+tmp <- Sim(fun = "run", arg = arg, I = I, print = F, log = F, cores = 2,
+           name = "res1")
 t2 <- Sys.time()
 
 t2 - t1
@@ -302,11 +307,9 @@ head(res1[[1]])
 ### Results 1 ###
 #################
 
-
-res <- res1[[1]]
-
-# setwd(dir.res)
-# load("res 2012-10-13 16:58:01.Rdata")
+setwd(dir.res)
+load("res1.Rdata")
+res <- res1
 
 dim(res)
 
@@ -609,8 +612,8 @@ setwd(dir.res)
 I <- 1e3
 
 t1 <- Sys.time()
-res2 <- Sim(fun = "run.2", arg = arg, I = I, log = F, cores = 2,
-            name = "results_phase2")
+tmp <- Sim(fun = "run.2", arg = arg, I = I, log = F, cores = 2,
+           name = "res2")
 t2 <- Sys.time()
 
 t1
@@ -624,7 +627,6 @@ t2 - t1
 ###################
 ### True Values ###
 ###################
-
 
 head(pop.eka)
 
@@ -676,7 +678,8 @@ setwd(dir.res)
 load("pop.eka_tv.Rdata")
 tv
 
-res <- res2[[1]]
+load("res2.Rdata")
+res <- res2
 
 head(res)
 names(res)
