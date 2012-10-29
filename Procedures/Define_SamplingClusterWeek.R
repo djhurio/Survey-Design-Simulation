@@ -160,9 +160,9 @@ SamplingClusterWeek <- function(frame.1,
   if (n %% weeks > 0) stop("n is not a multiple of weeks")
   
   if (name.weight %in% colnames(frame.1))
-    print("WARNING: Weight variable exists, it will be overwrited")
+    print("WARNING: Weight variable exists, it will be overwritten")
   if (name.week %in% colnames(frame.1))
-    print("WARNING: Week variable exists, it will be overwrited")
+    print("WARNING: Week variable exists, it will be overwritten")
   
   if (!name.cluster %in% colnames(frame.1))
     stop("ERROR: Can not find cluster variable in frame.1")
@@ -171,10 +171,12 @@ SamplingClusterWeek <- function(frame.1,
   
   # Sampling
   
-  #s.2 <- as.vector(frame.2[, name.cluster][sort(sample(1:N, n))])
-  s.2 <- as.vector(frame.2[, name.cluster][sample(1:N, n)])
+  # s.2 <- as.vector(frame.2[, name.cluster][sort(sample(1:N, n))])
+  s.2 <- as.vector(frame.2[, name.cluster][sample(N, n)])
   
-  tmp <- data.frame(s.2, (1:n-1) %% weeks + 1)
+  # tmp <- data.frame(s.2, (1:n-1) %% weeks + 1)
+  # Randomise the order of week numbers
+  tmp <- data.frame(s.2, sample(rep(1:weeks, n / weeks)))
   names(tmp) <- c(name.cluster, name.week)
   
   s.1 <- data.frame(frame.1[frame.1[, name.cluster] %in% s.2, ])

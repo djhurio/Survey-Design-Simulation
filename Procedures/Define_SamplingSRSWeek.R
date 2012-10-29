@@ -115,19 +115,20 @@ SamplingSRSWeek <- function(frame.1,
   if (n %% weeks > 0) stop("n is not a multiple of weeks")
   
   if (name.weight %in% colnames(frame.1))
-    print("WARNING: Weight variable exists, it will be overwrited")
+    print("WARNING: Weight variable exists, it will be overwritten")
   if (name.week %in% colnames(frame.1))
-    print("WARNING: Week variable exists, it will be overwrited")
+    print("WARNING: Week variable exists, it will be overwritten")
   
   # Sampling
   
   #s <- sort(sample(1:N, n))
-  s <- sample(1:N, n)
+  #s <- sample(N, n)
   
-  s.1 <- data.frame(frame.1[s, ])
+  s.1 <- data.frame(frame.1[sample(N, n), ])
   s.1[name.weight] <- N/n
-  s.1[name.week] <- (1:n-1) %% weeks + 1
-  
+  # s.1[name.week] <- (1:n-1) %% weeks + 1
+  # Randomise the order of week numbers
+  s.1[name.week] <- sample(rep(1:weeks, n / weeks))
   return(s.1)
 }
 

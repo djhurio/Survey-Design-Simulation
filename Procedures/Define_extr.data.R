@@ -46,7 +46,7 @@ extr.data <- function(x, rows, cols, col.skip = 0, var.name = "var") {
   if (is.null(dim(x))) stop("x is not a two dimensional object")
   
   N <- nrow(x)
-  M <- ncol(x)
+  M <- ncol(x) - col.skip
   
   rows <- as.integer(rows)
   cols <- as.integer(cols)
@@ -64,8 +64,7 @@ extr.data <- function(x, rows, cols, col.skip = 0, var.name = "var") {
   d2 <- mapply(extr, rows, cols + col.skip)
   
   if (col.skip > 0) {
-    d1 <- data.frame(x[rows, 1:col.skip])
-    d <- data.frame(d1, d2)
+    d <- data.frame(data.frame(x[rows, 1:col.skip]), d2)
   } else {
     d <- data.frame(d2)
   }
