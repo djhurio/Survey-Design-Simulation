@@ -490,7 +490,7 @@ Sim <- function(fun, arg, I = 5,
   
   # Test run
   # test <- eval(call(fun, arg[1]))
-  test <- do.call(fun, arg[1, ])
+  test <- do.call(fun, arg[1, , drop = F])
   m <- length(test)
   
   cat("Simulation name:", name, "\n")
@@ -512,14 +512,14 @@ Sim <- function(fun, arg, I = 5,
       if (!is.na(seed)) set.seed(seed[i])
       
       # tr <- try(eval(call(fun, a)), T)
-      tr <- try(do.call(fun, arg[a, ]), T)
+      tr <- try(do.call(fun, arg[a, , drop = F]), T)
       
       if (class(tr) == "try-error")
-        res <- data.frame(t1, name, i, seed[i], arg[a, ],
+        res <- data.frame(t1, name, a, i, seed[i], arg[a, , drop = F],
                           tr[[1]], matrix(NA, 1, m)) else
-        res <- data.frame(t1, name, i, seed[i], arg[a, ], NA, tr)
+        res <- data.frame(t1, name, a, i, seed[i], arg[a, ], NA, tr)
       
-      colnames(res) <- paste("v", 1:(4 + ncol(arg) + 1 + m), sep = "")
+      colnames(res) <- paste("v", 1:(5 + ncol(arg) + 1 + m), sep = "")
       
       res
     }
@@ -527,7 +527,7 @@ Sim <- function(fun, arg, I = 5,
   t2 <- Sys.time()
   time.run <- as.numeric(t2 - t1, units="secs")
   
-  colnames(R) <- make.names(c("timestamp", "name", "i", "seed",
+  colnames(R) <- make.names(c("timestamp", "name", "a", "i", "seed",
                    colnames(arg), "err", colnames(test)), unique = T)
   rownames(R) <- NULL
   

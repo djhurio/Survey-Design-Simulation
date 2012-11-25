@@ -10,7 +10,7 @@ require(ggplot2)
 require(foreach)
 require(bigmemory)
 require(bigtabulate)
-require(xlsx)
+# require(xlsx)
 
 # citation("ggplot2")
 
@@ -22,16 +22,21 @@ gc()
 source(".Rprofile")
 
 
+### Options
+pdf.options(width = 8, height = 6, reset = T)
+
 
 ### Dir
 
 data.tmp <- "~/temp/pop"
+proj.data <- paste(projwd, "Data", sep = "/")
+dir.res <- paste(projwd, "Results", "DynPop", sep = "/")
 
 
 
 ### Data
 
-setwd(projwd)
+setwd(proj.data)
 load("TM.Rdata")
 TM
 
@@ -64,7 +69,8 @@ mpower(TM.list[[2]], 10000)[1,]
 mpower(TM.list[[3]], 10000)[1,]
 mpower(TM.list[[4]], 10000)[1,]
 
-TM.y <- as.matrix(TM.list[[1]]) %*% as.matrix(TM.list[[2]]) %*% as.matrix(TM.list[[3]]) %*% as.matrix(TM.list[[4]])
+TM.y <- as.matrix(TM.list[[1]]) %*% as.matrix(TM.list[[2]]) %*%
+  as.matrix(TM.list[[3]]) %*% as.matrix(TM.list[[4]])
 
 TM.y
 mpower(TM.y, 10000)[1,]
@@ -82,7 +88,7 @@ stat.distr
 
 ###
 
-setwd(dir.data.out)
+setwd(dir.data)
 
 # load("frame.p.Rdata")
 frame.p.df <- attach.big.matrix("frame.p.desc")
@@ -122,14 +128,14 @@ head(popg)
 
 ###
 
-col.distr <- function(x) {
-  m <- ncol(x)
+col.distr <- function(x, skip = 0) {
+  m <- ncol(x) - skip
   
   distr <- function(i, x) {
     as.numeric(prop.table(bigtable(x, i)))
   }
   
-  data.frame(sapply(1:m, distr, x = x))
+  data.frame(sapply(skip + 1:m, distr, x = x))
 }
 
 
@@ -138,7 +144,7 @@ col.distr <- function(x) {
 ###
 
 # distr <- data.frame(sapply(popg, function(x) prop.table(table(x))))
-distr <- col.distr(popg)
+distr <- col.distr(popg, skip = 4)
 class(distr)
 distr
 round(distr, 3)
@@ -147,7 +153,9 @@ distr$eka <- as.character(1:3)
 distr[, 1:10]
 
 distr.melt <- melt(distr, "eka")
-distr.melt$time <- as.integer(substring(as.character(distr.melt$variable), 2)) - 1
+head(distr.melt)
+
+distr.melt$w <- as.integer(substring(as.character(distr.melt$variable), 2)) - 1L
 head(distr.melt)
 tail(distr.melt)
 
@@ -162,63 +170,57 @@ rep(stat.distr[1, ], times=6, each=13)
 Y <- 6
 K <- Y*52
 
-stat.distr.p <- data.frame(time = rep(1:K-1, 3),
+stat.distr.p <- data.frame(w = rep(1:K, 3),
                            eka = as.character(rep(1:3, each = K)),
                            p = c(rep(stat.distr[1, ], times = Y, each = 13),
                                  rep(stat.distr[2, ], times = Y, each = 13),
-                                 rep(stat.distr[3, ], times = Y, each = 13)))
+                                 rep(stat.distr[3, ], times = Y, each = 13)),
+                           stringsAsFactors = F)
 head(stat.distr.p)
 
+### Draw plots
 
-# Temp - one transition matrix
-# stat.distr.p <- data.frame(time = rep(1:K, 3),
-#                            eka = as.character(rep(1:3, each = K)),
-#                            p = c(rep(stat.distr[1, 1], K),
-#                                  rep(stat.distr[2, 1], K),
-#                                  rep(stat.distr[3, 1], K)))
-# head(stat.distr.p)
-# tail(stat.distr.p)
-# K*3
+setwd(dir.res)
 
-# p1 <- ggplot(stat.distr.p, aes(x = time, y = p, group = eka))
-# p1 + geom_line(aes(color = eka))
+head(stat.distr.p)
+head(distr.melt)
 
-# qplot(time, p, data = stat.distr.p, geom="step", colour = eka, linetype = 2) +
-#   scale_x_continuous(breaks = 0:12*13) +
+tail(stat.distr.p)
+tail(distr.melt)
+
+dim(stat.distr.p)
+dim(distr.melt)
+
+class(distr.melt)
+
+intersect(names(distr.melt), names(stat.distr.p))
+data.p <- merge(distr.melt, stat.distr.p, all = T)
+data.p$variable <- NULL
+
+head(data.p)
+tail(data.p)
+sum(is.na(data.p))
+
+# plot.eka <- function(x) {
+#   qplot(data = stat.distr.p[stat.distr.p$eka %in% x, ], x = time, y = p,
+#     geom="step", colour = eka, linetype = "dotted") +
+#   geom_line(data = distr.melt[distr.melt$eka %in% x, ],
+#     aes(x = time, y = value, color = eka), linetype = "solid") +
+#   geom_hline(yintercept = eka.distr[x], linetype = "dashed") + 
+#   geom_hline(yintercept = a.stat.distr[x], linetype = "dashed",
+#     colour = "orange") + 
+#   scale_x_continuous(breaks = seq(0, K, by = 26)) +
 #   theme_bw()
-
-# p <- ggplot(distr.melt, aes(x = time, y = value, group = eka))
-# p + geom_line(aes(color = eka)) +
-#     geom_hline(aes(yintercept = eka.distr, linetype = 2))
-
-# p + geom_line(aes(color = eka)) +
-#     geom_line(data = stat.distr.p, aes(x = time, y = p, group = eka, color = eka), linetype = 2) +
-#     geom_hline(aes(yintercept = eka.distr, linetype = 2)) + 
-#     scale_x_continuous(breaks = 0:12*13) +
-#     theme_bw()
-
-# p + geom_line(aes(color = eka)) +
-#     geom_hline(aes(yintercept = eka.distr, linetype = 2)) + 
-#     scale_x_continuous(breaks = 0:12*13) +
-#     theme_bw()
-
-# qplot(data = stat.distr.p, x = time, y = p, geom="step", colour = eka, linetype = 2) +
-#   geom_line(data = distr.melt, aes(x = time, y = value, color = eka), linetype = 1) +
-#   geom_hline(aes(yintercept = eka.distr), linetype = 2) + 
-#   scale_x_continuous(breaks = 0:12*13) +
-#   theme_bw()
-
-# a.stat.distr
+# }
 
 plot.eka <- function(x) {
-  qplot(data = stat.distr.p[stat.distr.p$eka %in% x, ], x = time, y = p,
-        geom="step", colour = eka, linetype = 3) +
-    geom_line(data = distr.melt[distr.melt$eka %in% x, ],
-              aes(x = time, y = value, color = eka), linetype = "solid") +
-    geom_hline(aes(yintercept = eka.distr[x]), linetype = "dashed") + 
-    geom_hline(aes(yintercept = a.stat.distr[x]), linetype = "dashed", color = "orange") + 
-    scale_x_continuous(breaks = seq(0, K, by = 26)) +
-    theme_bw()
+  ggplot(data = data.p[data.p$eka %in% x, ], aes(x = w)) +
+  geom_line(aes(y = value, colour = eka), linetype = 1) +
+  geom_step(aes(y = p, colour = eka), linetype = 2) +
+  geom_hline(yintercept = eka.distr[x], linetype = 3, colour = x) + 
+  geom_hline(yintercept = a.stat.distr[x], linetype = 4, colour = x) + 
+  scale_x_continuous(breaks = seq(0, K, by = 26)) +
+  theme_bw() + scale_colour_identity(guide = "legend")
 }
 
 plot.eka(1:3)
@@ -227,16 +229,10 @@ plot.eka(2)
 plot.eka(3)
 plot.eka(c(1,3))
 
-pdf.options()
-
-pdf("pop_gen_plot.pdf", paper = "a4r")
-# pdf("pop_gen_plot_oneTM.pdf")
-plot.eka(1:3)
-plot.eka(1)
-plot.eka(2)
-plot.eka(3)
-plot.eka(c(1,3))
+pdf("pop_gen_plot.pdf")
+  plot.eka(1:3)
 dev.off()
+
 
 eka.distr
 stat.distr
@@ -251,7 +247,7 @@ TM
 # write.table(res, file = "state.distr.txt", row.names = F)
 # write.table(TM, file = "state.distr.txt", row.names = F)
 
-write.xlsx(res, "res.xlsx", "state.distr")
-write.xlsx(TM, "res.xlsx", "trans.matrix", append = T)
+# write.xlsx(res, "res.xlsx", "state.distr")
+# write.xlsx(TM, "res.xlsx", "trans.matrix", append = T)
 
 

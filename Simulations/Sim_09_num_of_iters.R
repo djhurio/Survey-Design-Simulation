@@ -759,7 +759,7 @@ run.2 <- function(code, n) {
 }
 
 
-run.2(d1, m)
+run.2(d1, m*N/M)
 # run.2(d1, n_SRS)
 
 run.2(d2, m)
@@ -779,7 +779,7 @@ designs <- c(d1, d2, d3)
 #                   n = c(n_SRS, n_Clust, m),
 #                   stringsAsFactors = F)
 arg <- data.frame(code = designs,
-                  n = m,
+                  n = c(m*N/M, m, m),
                   stringsAsFactors = F)
 arg
 
@@ -793,7 +793,7 @@ Sim(fun = "run.2", arg = arg, I = I, print = T, cores = 2)[[1]]
 
 setwd(dir.res)
 
-I <- 5e3
+I <- 100e3
 
 t1 <- Sys.time()
 tmp <- Sim(fun = "run.2", arg = arg, I = I, log = F, cores = 2,

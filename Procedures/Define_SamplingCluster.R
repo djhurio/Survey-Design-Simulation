@@ -6,7 +6,8 @@
 # ### Ver02
 # # Two frames
 
-SamplingCluster <- function(frame.1, frame.2, n=30, name.weight=".dw", name.cluster) {
+SamplingCluster <- function(frame.1, frame.2, n=30, name.weight=".dw",
+                            name.cluster) {
 
   # Libs
   require(bigmemory)
@@ -33,13 +34,15 @@ SamplingCluster <- function(frame.1, frame.2, n=30, name.weight=".dw", name.clus
 
   # Sampling
 
-  s.2 <- as.vector(frame.2[, name.cluster][sample(1:N, n)])
+  s.2 <- as.vector(frame.2[, name.cluster][sample(N, n)])
 
   s.1 <- as.data.frame(frame.1[frame.1[,name.cluster] %in% s.2, ])
   s.1[name.weight] <- N/n
 
   return(s.1)
 }
+
+# 1:10 %in% 3:6
 
 ################
 ### Dev Area ###

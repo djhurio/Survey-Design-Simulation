@@ -72,19 +72,21 @@
 # c("a", "b", NULL)
 
 gr.den <- function(x, data, tv = NULL,
-                   fill = NULL, linetype = NULL, color = NULL, size = NULL,
+                   fill = NULL, linetype = NULL, colour = NULL, size = NULL,
                    adjust = 1,
                    title = "") {
+  
+  require(ggplot2)
   
   x <- as.character(x)[1]
   
   data <- data[!is.na(data[, x]), ]
   
-  agg <- aggregate(data[x], data[c(fill, linetype, color, size)], mean)
+  agg <- aggregate(data[x], data[c(fill, linetype, colour, size)], mean)
   # print(agg)
   
   ggplot(data,
-    aes_string(x = x, fill = fill, linetype = linetype, color = color,
+    aes_string(x = x, fill = fill, linetype = linetype, colour = colour,
                size = size)) +
     geom_density(alpha = 0.2, adjust = adjust) +
     xlab(x) + 
@@ -94,6 +96,6 @@ gr.den <- function(x, data, tv = NULL,
                aes_string(xintercept = x), linetype = "dashed", size = .5) +
     if (!is.null(tv) & x %in% names(tv)) {
       geom_vline(data = tv, aes_string(xintercept = x),
-                 color = "red", size = .5)
+                 colour = "red", size = .5)
     }
 }

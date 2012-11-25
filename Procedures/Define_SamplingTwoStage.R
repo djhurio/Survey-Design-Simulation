@@ -73,7 +73,7 @@ SamplingTwoStage <- function(frame.PSU,
 	# Function nemesis
 	nemesis <- function(s, A, b, W, d, Q, w, M, hi, add) {
 
-    sample.step <- Q / W + (1 - d) / A / W
+    sample.step <- Q / W + (1 + d) / A / W
 		
     sample.PSU <- data.frame(strata = s,
                              b = b,
@@ -81,8 +81,8 @@ SamplingTwoStage <- function(frame.PSU,
                              week = rep(1:w, each=A))
 		
     sample.PSU$a <- (hi + 
-      (b - 1) * (1 + (1 - d) / A / W) / 2 +
-      (sample.PSU$i - 1) * (1 - d) / A +
+      (b - 1) * (1 + d) * (A + 1) / (A * b) +
+      (sample.PSU$i - 1) * (1 + d) / A +
 			(sample.PSU$week - 1) * sample.step) %% 1
 		
     sample.PSU$x <- sin(2 * pi * sample.PSU$a) / 2 / pi
@@ -140,6 +140,7 @@ SamplingTwoStage <- function(frame.PSU,
 	### Selecting of PSUs
 
 	# List of sampling points
+  #head(s.2)
 	s.3 <- s.2$A
 	#head(s.3)
 
@@ -229,7 +230,7 @@ SamplingTwoStage <- function(frame.PSU,
 	#sum(sample.TSU[, name.weight])
   
   
-  ### Add week
+  ### Add week  
   
   #head(s.5)
   s.week <- s.5[, c(name.PSU, "week")]
@@ -246,10 +247,10 @@ SamplingTwoStage <- function(frame.PSU,
 
 
 
-################
-### Dev area ###
-################
-
+# ################
+# ### Dev area ###
+# ################
+# 
 # ### Reset
 # setwd(projwd)
 # rm(list = ls())
@@ -263,6 +264,7 @@ SamplingTwoStage <- function(frame.PSU,
 # library(biganalytics)
 # library(rbenchmark)
 # 
+# require(xtable)
 # 
 # ### Proc
 # 
@@ -289,29 +291,29 @@ SamplingTwoStage <- function(frame.PSU,
 # 
 # ### Strata selection (if necesary)
 # 
-# strata.selected <- 4
-# 
-# 
-# # frame.p
-# head(frame.p)
-# bigtable(frame.p, "strata")
-# class(frame.p)
-# frame.p <- frame.p[frame.p[, "strata"] %in% strata.selected, ]
-# class(frame.p)
-# 
-# # frame.h
-# head(frame.h)
-# bigtable(frame.h, "strata")
-# class(frame.h)
-# frame.h <- frame.h[frame.h[, "strata"] %in% strata.selected, ]
-# class(frame.h)
-# 
-# # frame.PSU
-# head(frame.PSU)
-# bigtable(frame.PSU, "strata")
-# class(frame.PSU)
-# frame.PSU <- frame.PSU[frame.PSU[, "strata"] %in% strata.selected, ]
-# class(frame.PSU)
+# # strata.selected <- 1:4
+# # 
+# # 
+# # # frame.p
+# # head(frame.p)
+# # bigtable(frame.p, "strata")
+# # class(frame.p)
+# # frame.p <- frame.p[frame.p[, "strata"] %in% strata.selected, ]
+# # class(frame.p)
+# # 
+# # # frame.h
+# # head(frame.h)
+# # bigtable(frame.h, "strata")
+# # class(frame.h)
+# # frame.h <- frame.h[frame.h[, "strata"] %in% strata.selected, ]
+# # class(frame.h)
+# # 
+# # # frame.PSU
+# # head(frame.PSU)
+# # bigtable(frame.PSU, "strata")
+# # class(frame.PSU)
+# # frame.PSU <- frame.PSU[frame.PSU[, "strata"] %in% strata.selected, ]
+# # class(frame.PSU)
 # 
 # 
 # 
@@ -331,33 +333,38 @@ SamplingTwoStage <- function(frame.PSU,
 # max.PSU.size.h <- aggregate(frame.PSU["size"], frame.PSU["strata"], max)[, 2]
 # max.PSU.size.h
 # 
-# delta <- 1 / max.PSU.size.h
+# # delta <- 1 / max.PSU.size.h
+# delta <- max.PSU.size.h / M.h
 # delta
 # 
 # weeks <- 13
 # 
 # 
-# # sampl.des.par <- data.frame(s = 1:4,
-# #                             A = 8,
-# #                             B = c(1, 2, 2, 2),
-# #                             W = 13,
-# #                             d = delta,
-# #                             Q = 0,
-# #                             w = weeks,
-# #                             M = M.h,
-# #                             m = c(10, 7, 8, 9))
-# 
-# sampl.des.par <- data.frame(s = 4,
+# sampl.des.par <- data.frame(s = 1:4,
 #                             A = 8,
-#                             B = 2,
+#                             B = c(1, 2, 2, 2),
 #                             W = 13,
-#                             d = 0,
+#                             d = delta,
 #                             Q = 0,
 #                             w = weeks,
 #                             M = M.h,
-#                             m = 9)
+#                             m = c(10, 7, 8, 9))
+# 
+# # sampl.des.par <- data.frame(s = 4,
+# #                             A = 8,
+# #                             B = 2,
+# #                             W = 13,
+# #                             d = 0,
+# #                             Q = 0,
+# #                             w = weeks,
+# #                             M = M.h,
+# #                             m = 9)
 # 
 # sampl.des.par
+# names(sampl.des.par)
+# 
+# print(xtable(sampl.des.par, digits = c(0, 0, 0, 0, 0, 6, 0, 0, 0, 0)),
+#       include.rownames = F, only.contents = T)
 # 
 # m <- sum(sampl.des.par$A * sampl.des.par$B * sampl.des.par$w * sampl.des.par$m)
 # m

@@ -128,10 +128,14 @@ SamplingSRSWeek <- function(frame.1,
   s.1[name.weight] <- N/n
   # s.1[name.week] <- (1:n-1) %% weeks + 1
   # Randomise the order of week numbers
-  s.1[name.week] <- sample(rep(1:weeks, n / weeks))
+  # s.1[name.week] <- sample(rep(1:weeks, n / weeks))
+  s.1[name.week] <- rep(1:weeks, each = n / weeks)
   return(s.1)
 }
 
+# rep(1:5, 3)
+# rep(1:5, each = 3)
+# rep(1:5, times = 3)
 
 ################
 ### Dev area ###

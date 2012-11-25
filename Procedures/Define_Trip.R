@@ -198,10 +198,6 @@ Trip.fast <- function(data, coord.int) {
   tsp <- TSP(dist.matrix)
   t <- solve_TSP(tsp, control = list(start = 1L))
   
-  # data <- as.data.frame(rbind(data[t, ], coord.int))
-  # rownames(data) <- NULL
-  
-  # return(list(attr(t, "tour_length"), data))
   return(attr(t, "tour_length"))
   
 }
@@ -241,48 +237,48 @@ Trip.fast <- function(data, coord.int) {
 # }
 
 
-### Vectorised Trip
-### V02
-### Added period
-
-vTrip <- function(data, coord.int) {
-  
-  # Argument type convertion
-  data <- as.data.frame(data[1:4])
-  coord.int <- as.data.frame(coord.int)[1:3]
-  
-  int.in.data <- unique(data[,1])
-  coord.int <- coord.int[coord.int[,1] %in% int.in.data, ]
-  
-  length(int.in.data)
-  
-  # Test
-  if (length(int.in.data) != length(unique(coord.int[,1]))) stop("Error1 in int.ID")
-  if (!all(sort(int.in.data) == sort(unique(coord.int[,1])))) stop("Error2 in int.ID")
-  
-  # Redefine Trip
-  
-  Trip.alt <- function(int, week) {
-    r <- Trip(data[data[,1] == int & data[,2] == week, 3:4], coord.int[coord.int[,1] == int, 2:3])
-    res1 <- data.frame(int = int, week = week, dist = r[[1]])
-    res2 <- data.frame(int = int, week = week, r[[2]])
-    return(list(res1, res2))
-  }
-
-  # Run
-  
-  tab <- unique(data[1:2])
-  tab <- tab[order(tab[,1], tab[,2]), ]
-  rownames(tab) <- NULL
-  
-  res <- mapply(Trip.alt, tab[,1], tab[,2])
-  
-  res1 <- as.data.frame(do.call(rbind, res[1, ]))
-  res2 <- as.data.frame(do.call(rbind, res[2, ]))
-  
-  return(list(res1, res2))
-  
-}
+# ### Vectorised Trip
+# ### V02
+# ### Added period
+# 
+# vTrip <- function(data, coord.int) {
+#   
+#   # Argument type convertion
+#   data <- as.data.frame(data[1:4])
+#   coord.int <- as.data.frame(coord.int)[1:3]
+#   
+#   int.in.data <- unique(data[,1])
+#   coord.int <- coord.int[coord.int[,1] %in% int.in.data, ]
+#   
+#   length(int.in.data)
+#   
+#   # Test
+#   if (length(int.in.data) != length(unique(coord.int[,1]))) stop("Error1 in int.ID")
+#   if (!all(sort(int.in.data) == sort(unique(coord.int[,1])))) stop("Error2 in int.ID")
+#   
+#   # Redefine Trip
+#   
+#   Trip.alt <- function(int, week) {
+#     r <- Trip(data[data[,1] == int & data[,2] == week, 3:4], coord.int[coord.int[,1] == int, 2:3])
+#     res1 <- data.frame(int = int, week = week, dist = r[[1]])
+#     res2 <- data.frame(int = int, week = week, r[[2]])
+#     return(list(res1, res2))
+#   }
+# 
+#   # Run
+#   
+#   tab <- unique(data[1:2])
+#   tab <- tab[order(tab[,1], tab[,2]), ]
+#   rownames(tab) <- NULL
+#   
+#   res <- mapply(Trip.alt, tab[,1], tab[,2])
+#   
+#   res1 <- as.data.frame(do.call(rbind, res[1, ]))
+#   res2 <- as.data.frame(do.call(rbind, res[2, ]))
+#   
+#   return(list(res1, res2))
+#   
+# }
 
 ### Vectorised Trip
 ### V02b
@@ -300,138 +296,132 @@ vTrip.fast.1 <- function(data, coord.int) {
   #length(int.in.data)
   
   # Test
-  #if (length(int.in.data) != length(unique(coord.int[,1]))) stop("Error1 in int.ID")
-  #if (!all(sort(int.in.data) == sort(unique(coord.int[,1])))) stop("Error2 in int.ID")
+  #if (length(int.in.data) != length(unique(coord.int[,1])))
+  #  stop("Error1 in int.ID")
+  #if (!all(sort(int.in.data) == sort(unique(coord.int[,1]))))
+  #  stop("Error2 in int.ID")
   
   # Redefine Trip
   
   Trip.alt <- function(int, week) {
-    r <- Trip.fast(data[data[,1] == int & data[,2] == week, 3:4], coord.int[coord.int[,1] == int, 2:3])
-    #res1 <- data.frame(int = int, week = week, dist = r[[1]])
-    #res2 <- data.frame(int = int, week = week, r[[2]])
-    #return(list(res1, res2))
+    r <- Trip.fast(data[data[,1] == int & data[,2] == week, 3:4],
+                   coord.int[coord.int[,1] == int, 2:3])
     return(r)
   }
   
   # Run
   
   tab <- unique(data[1:2])
-  #tab <- tab[order(tab[,1], tab[,2]), ]
-  #rownames(tab) <- NULL
   
   res <- mapply(Trip.alt, tab[,1], tab[,2])
   
-  #res1 <- as.data.frame(do.call(rbind, res[1, ]))
-  #res2 <- as.data.frame(do.call(rbind, res[2, ]))
-  
-  #return(list(res1, res2))
   return(sum(res))
   
 }
 
 
-### Vectorised Trip
-### V02c
-### Fast version
-### Replace of mapply by lapply
-
-vTrip.fast.2 <- function(data, coord.int) {
-  
-  # Argument type convertion
-  data <- as.data.frame(data[1:4])
-  coord.int <- as.data.frame(coord.int)[1:3]
-  
-  #int.in.data <- unique(data[,1])
-  #coord.int <- coord.int[coord.int[,1] %in% int.in.data, ]
-  
-  #length(int.in.data)
-  
-  # Test
-  #if (length(int.in.data) != length(unique(coord.int[,1]))) stop("Error1 in int.ID")
-  #if (!all(sort(int.in.data) == sort(unique(coord.int[,1])))) stop("Error2 in int.ID")
-  
-  # Redefine Trip
-  
-  Trip.alt <- function(x) {
-    x <- unlist(x)
-    r <- Trip.fast(data[data[,1] == x[1] & data[,2] == x[2], 3:4], coord.int[coord.int[,1] == x[1], 2:3])
-    return(r)
-  }
-  
-  # Run
-  
-  tab <- unique(data[1:2])
-  rownames(tab) <- NULL
-  tab <- split(tab, rownames(tab))
-  
-  res <- sapply(tab, Trip.alt)
-  
-  #res1 <- as.data.frame(do.call(rbind, res[1, ]))
-  #res2 <- as.data.frame(do.call(rbind, res[2, ]))
-  
-  #return(list(res1, res2))
-  return(sum(res))
-  
-}
-
-
-### Vectorised Trip
-### V02d
-### Fast version
-### paralel
-
-vTrip.fast.3 <- function(data, coord.int) {
-  
-  require(parallel)
-  #getOption("mc.cores", 2L)
-    
-  # Argument type convertion
-  data <- as.data.frame(data[1:4])
-  coord.int <- as.data.frame(coord.int)[1:3]
-  
-  #int.in.data <- unique(data[,1])
-  #coord.int <- coord.int[coord.int[,1] %in% int.in.data, ]
-  
-  #length(int.in.data)
-  
-  # Test
-  #if (length(int.in.data) != length(unique(coord.int[,1]))) stop("Error1 in int.ID")
-  #if (!all(sort(int.in.data) == sort(unique(coord.int[,1])))) stop("Error2 in int.ID")
-  
-  # Redefine Trip
-  
-  Trip.alt <- function(x) {
-    x <- unlist(x)
-    r <- Trip.fast(data[data[,1] == x[1] & data[,2] == x[2], 3:4], coord.int[coord.int[,1] == x[1], 2:3])
-    return(r)
-  }
-  
-  # Run
-  
-  tab <- unique(data[1:2])
-  rownames(tab) <- NULL
-  tab <- split(tab, rownames(tab))
-  
-  res <- simplify2array(mclapply(tab, Trip.alt))
-  #sum(res)
-  
-  #res1 <- as.data.frame(do.call(rbind, res[1, ]))
-  #res2 <- as.data.frame(do.call(rbind, res[2, ]))
-  
-  #return(list(res1, res2))
-  return(sum(res))
-  
-}
-
-
+# ### Vectorised Trip
+# ### V02c
+# ### Fast version
+# ### Replace of mapply by lapply
+# 
+# vTrip.fast.2 <- function(data, coord.int) {
+#   
+#   # Argument type convertion
+#   data <- as.data.frame(data[1:4])
+#   coord.int <- as.data.frame(coord.int)[1:3]
+#   
+#   #int.in.data <- unique(data[,1])
+#   #coord.int <- coord.int[coord.int[,1] %in% int.in.data, ]
+#   
+#   #length(int.in.data)
+#   
+#   # Test
+#   #if (length(int.in.data) != length(unique(coord.int[,1]))) stop("Error1 in int.ID")
+#   #if (!all(sort(int.in.data) == sort(unique(coord.int[,1])))) stop("Error2 in int.ID")
+#   
+#   # Redefine Trip
+#   
+#   Trip.alt <- function(x) {
+#     x <- unlist(x)
+#     r <- Trip.fast(data[data[,1] == x[1] & data[,2] == x[2], 3:4], coord.int[coord.int[,1] == x[1], 2:3])
+#     return(r)
+#   }
+#   
+#   # Run
+#   
+#   tab <- unique(data[1:2])
+#   rownames(tab) <- NULL
+#   tab <- split(tab, rownames(tab))
+#   
+#   res <- sapply(tab, Trip.alt)
+#   
+#   #res1 <- as.data.frame(do.call(rbind, res[1, ]))
+#   #res2 <- as.data.frame(do.call(rbind, res[2, ]))
+#   
+#   #return(list(res1, res2))
+#   return(sum(res))
+#   
+# }
+# 
+# 
+# ### Vectorised Trip
+# ### V02d
+# ### Fast version
+# ### paralel
+# 
+# vTrip.fast.3 <- function(data, coord.int) {
+#   
+#   require(parallel)
+#   #getOption("mc.cores", 2L)
+#     
+#   # Argument type convertion
+#   data <- as.data.frame(data[1:4])
+#   coord.int <- as.data.frame(coord.int)[1:3]
+#   
+#   #int.in.data <- unique(data[,1])
+#   #coord.int <- coord.int[coord.int[,1] %in% int.in.data, ]
+#   
+#   #length(int.in.data)
+#   
+#   # Test
+#   #if (length(int.in.data) != length(unique(coord.int[,1]))) stop("Error1 in int.ID")
+#   #if (!all(sort(int.in.data) == sort(unique(coord.int[,1])))) stop("Error2 in int.ID")
+#   
+#   # Redefine Trip
+#   
+#   Trip.alt <- function(x) {
+#     x <- unlist(x)
+#     r <- Trip.fast(data[data[,1] == x[1] & data[,2] == x[2], 3:4], coord.int[coord.int[,1] == x[1], 2:3])
+#     return(r)
+#   }
+#   
+#   # Run
+#   
+#   tab <- unique(data[1:2])
+#   rownames(tab) <- NULL
+#   tab <- split(tab, rownames(tab))
+#   
+#   res <- simplify2array(mclapply(tab, Trip.alt))
+#   #sum(res)
+#   
+#   #res1 <- as.data.frame(do.call(rbind, res[1, ]))
+#   #res2 <- as.data.frame(do.call(rbind, res[2, ]))
+#   
+#   #return(list(res1, res2))
+#   return(sum(res))
+#   
+# }
 
 
 
 
-################
-### Dev area ###
-################
 
+
+# ################
+# ### Dev area ###
+# ################
+# 
 # ### Reset ###
 # setwd(projwd)
 # rm(list = ls())
@@ -442,10 +432,10 @@ vTrip.fast.3 <- function(data, coord.int) {
 # # libs
 # library(bigmemory)
 # require(rbenchmark)
-# 
+# require(gridExtra)
 # 
 # # DATA
-# setwd(dir.data.out)
+# setwd(dir.data)
 # pop <- attach.big.matrix("frame.p.desc")
 # head(pop)
 # 
@@ -457,11 +447,21 @@ vTrip.fast.3 <- function(data, coord.int) {
 # N2 <- nrow(pop[pop[, "int.ID"] == 2, ])
 # N3 <- nrow(pop[pop[, "int.ID"] == 3, ])
 # 
-# n <- 100
+# set.seed(20121114)
 # 
+# n <- 10
 # s1 <- as.data.frame(pop[pop[, "int.ID"] == 1, ][sample(1:N1, n), ])
 # s2 <- as.data.frame(pop[pop[, "int.ID"] == 2, ][sample(1:N2, n), ])
-# s3 <- as.data.frame(pop[pop[, "int.ID"] == 3, ][sample(1:N3, n), ])
+# 
+# n <- 50
+# s3 <- as.data.frame(pop[pop[, "int.ID"] == 1, ][sample(1:N1, n), ])
+# s4 <- as.data.frame(pop[pop[, "int.ID"] == 2, ][sample(1:N2, n), ])
+# 
+# n <- 100
+# s5 <- as.data.frame(pop[pop[, "int.ID"] == 1, ][sample(1:N1, n), ])
+# s6 <- as.data.frame(pop[pop[, "int.ID"] == 2, ][sample(1:N2, n), ])
+# 
+# 
 # head(s1)
 # head(s2)
 # head(s3)
@@ -477,7 +477,10 @@ vTrip.fast.3 <- function(data, coord.int) {
 # 
 # r1 <- Trip(data=s1[c("coord_x_p", "coord_y_p")], coord.int = frame.int[1, 3:4])
 # r2 <- Trip(data=s2[c("coord_x_p", "coord_y_p")], coord.int = frame.int[2, 3:4])
-# r3 <- Trip(data=s3[c("coord_x_p", "coord_y_p")], coord.int = frame.int[3, 3:4])
+# r3 <- Trip(data=s3[c("coord_x_p", "coord_y_p")], coord.int = frame.int[1, 3:4])
+# r4 <- Trip(data=s4[c("coord_x_p", "coord_y_p")], coord.int = frame.int[2, 3:4])
+# r5 <- Trip(data=s5[c("coord_x_p", "coord_y_p")], coord.int = frame.int[1, 3:4])
+# r6 <- Trip(data=s6[c("coord_x_p", "coord_y_p")], coord.int = frame.int[2, 3:4])
 # 
 # class(r1)
 # class(r1[[1]])
@@ -486,6 +489,41 @@ vTrip.fast.3 <- function(data, coord.int) {
 # r1[[1]]
 # r2[[1]]
 # r3[[1]]
+# 
+# frame.int[1, 3:4]
+# r1[[2]]
+# 
+# plot.trip <- function(x) {
+#   require(ggplot2)
+# 
+#   dist <- x[[1]]
+#   data <- x[[2]]
+#   data$home <- (rownames(data) == 1 | rownames(data) == nrow(data))
+#   
+#   ggplot(data, aes(coord_x_p, coord_y_p)) + 
+#     geom_point(aes(colour = home), size = 3) + 
+#     geom_path(linetype = 2) +
+#     theme_bw() + 
+#     labs(title = paste("Sample size", nrow(data) - 2, "distance", round(dist)))
+# }
+# 
+# plot.trip(r1)
+# plot.trip(r2)
+# plot.trip(r3)
+# plot.trip(r4)
+# plot.trip(r5)
+# plot.trip(r6)
+# 
+# setwd(dir.res)
+# 
+# pdf(file = "plot_Trip.pdf", paper = "a4")
+# grid.arrange(plot.trip(r1), plot.trip(r2), ncol=1)
+# grid.arrange(plot.trip(r3), plot.trip(r4), ncol=1)
+# grid.arrange(plot.trip(r5), plot.trip(r6), ncol=1)
+# dev.off()
+# 
+# 
+# 
 # 
 # Trip.fast(data=s1[c("coord_x_p", "coord_y_p")], coord.int = frame.int[1, 3:4])
 # Trip.fast(data=s2[c("coord_x_p", "coord_y_p")], coord.int = frame.int[2, 3:4])

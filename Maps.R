@@ -6,6 +6,7 @@
 # http://neogeo.lv/ekartes/koord2/ - test
 
 # http://laacz.lv/2009/11/10/pagasti-novadi-un-to-esamiba-gugles-kartes/#c67237
+# http://www.gisnet.lv/gisnet/2007/04/sesu-miljonu-opera/comment-page-1/#comment-86
 
 
 ## you will need the sp-package

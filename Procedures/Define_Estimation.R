@@ -23,8 +23,8 @@ Estimation <- function(x, w, param) {
   if (ncol(param) != 3) stop("Error in param 2")
   
   # Estim
-  N <- ifelse(length(w) == 1, w * nrow(x), sum(w))
   n <- nrow(x)
+  N <- ifelse(length(w) == 1, w * n, sum(w))
 
   E <- as.data.frame(matrix(NA, 1, 2+nrow(param)))
   

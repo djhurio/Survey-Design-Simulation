@@ -313,7 +313,8 @@ SamplingClusterStr <- function(frame.1,
   
   ### Sampling
   # Modified sample function
-  sample.mod <- function(x, size, add = 0) sample(x, size, FALSE, NULL) + add
+  # Defined by the script "/Procedures/sample.mod.R"
+  # sample.mod <- function(x, size, add = 0) sample(x, size) + add
 
   s.2.index <- unlist(mapply(sample.mod, N, n, a, SIMPLIFY = F))
   s.2 <- frame.2[s.2.index, name.cluster]

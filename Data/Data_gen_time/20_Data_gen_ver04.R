@@ -33,7 +33,6 @@ TM
 
 setwd(dir.data)
 
-# load("frame.p.Rdata")
 frame.p <- attach.big.matrix("frame.p.desc")
 
 head(frame.p)
@@ -51,8 +50,6 @@ eka.distr
 eka <- frame.p[, "eka"]
 class(eka)
 length(eka)
-
-rm(frame.p)
 
 
 ###
@@ -100,9 +97,7 @@ gen.pop <- function(state0, tm.list, time,
   
   for (i in 1:m1) {
     cat(paste("i:", i, "time:", time[i], "\n"))
-    #pop[, m2+1+i] <- state.change(pop[, m2+i], tm.list[[time[i]]])
-    # Hack to make static population
-    pop[, m2+1+i] <- pop[, m2+i]
+    pop[, m2+1+i] <- state.change(pop[, m2+i], tm.list[[time[i]]])
   }
   
   return(NULL)
@@ -116,22 +111,20 @@ gen.pop <- function(state0, tm.list, time,
 
 setwd(dir.data)
 
-# time <- rep(1:4, times = 1, each = 13)
-time <- rep(1, times = 1, each = 13)
+time <- rep(1:4, times = 6, each = 13)
 time
 length(time)
 
 set.seed(20120502)
 gen.pop(eka, TM.cum.list, time,
-        file.name = "pop.eka.static",
+        file.name = "pop.eka",
         extra.col = c("casenum", "H_ID", "P_ID", "strata"))
 
 
 
 ###
 
-# popg <- attach.big.matrix("pop.eka.desc")
-popg <- attach.big.matrix("pop.eka.static.desc")
+popg <- attach.big.matrix("pop.eka.desc")
 class(popg)
 head(popg)
 

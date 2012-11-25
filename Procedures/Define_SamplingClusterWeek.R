@@ -176,7 +176,8 @@ SamplingClusterWeek <- function(frame.1,
   
   # tmp <- data.frame(s.2, (1:n-1) %% weeks + 1)
   # Randomise the order of week numbers
-  tmp <- data.frame(s.2, sample(rep(1:weeks, n / weeks)))
+  # tmp <- data.frame(s.2, sample(rep(1:weeks, n / weeks)))
+  tmp <- data.frame(s.2, rep(1:weeks, each = n / weeks))
   names(tmp) <- c(name.cluster, name.week)
   
   s.1 <- data.frame(frame.1[frame.1[, name.cluster] %in% s.2, ])

@@ -43,16 +43,16 @@
 
 extr.data <- function(x, rows, cols, col.skip = 0, var.name = "var") {
   
-  if (is.null(dim(x))) stop("x is not a two dimensional object")
-  
-  N <- nrow(x)
-  M <- ncol(x) - col.skip
-  
   rows <- as.integer(rows)
   cols <- as.integer(cols)
   col.skip <- as.integer(col.skip)[1]
   var.name <- as.character(var.name)[1]
   
+  N <- nrow(x)
+  M <- ncol(x) - col.skip
+  
+  if (is.null(dim(x))) stop("x is not a two dimensional object")
+
   if (min(rows) < 1) stop("wrong id for rows")
   if (max(rows) > N) stop("wrong id for rows")
   if (min(cols) < 1) stop("wrong id for cols")
