@@ -1,10 +1,10 @@
 # ###### Function: SamplingCluster
 
-# ### Ver01
-# # Initial version
+### Ver01
+# Initial version
 
-# ### Ver02
-# # Two frames
+### Ver02
+# Two frames
 
 SamplingCluster <- function(frame.1, frame.2, n=30, name.weight=".dw",
                             name.cluster) {
@@ -13,7 +13,6 @@ SamplingCluster <- function(frame.1, frame.2, n=30, name.weight=".dw",
   require(bigmemory)
 
   # Argument type convertion
-  
   if (!is.big.matrix(frame.1)) frame.1 <- as.data.frame(frame.1)
   if (!is.big.matrix(frame.2)) frame.2 <- as.data.frame(frame.2)
   n <- as.integer(n)
@@ -21,7 +20,6 @@ SamplingCluster <- function(frame.1, frame.2, n=30, name.weight=".dw",
   name.cluster <- as.character(name.cluster)
 
   # Testing
-
   N <- nrow(frame.2)
 
   if (n <= 0 | n > N) stop("ERROR: n has to be in 0-N")
@@ -33,7 +31,6 @@ SamplingCluster <- function(frame.1, frame.2, n=30, name.weight=".dw",
     stop("ERROR: Can not find cluster variable in frame.2")
 
   # Sampling
-
   s.2 <- as.vector(frame.2[, name.cluster][sample(N, n)])
 
   s.1 <- as.data.frame(frame.1[frame.1[,name.cluster] %in% s.2, ])
@@ -41,48 +38,3 @@ SamplingCluster <- function(frame.1, frame.2, n=30, name.weight=".dw",
 
   return(s.1)
 }
-
-# 1:10 %in% 3:6
-
-################
-### Dev Area ###
-################
-
-# # libs
-# library(bigmemory)
-
-
-# # Workdir
-# # dir <- "/home/djhurio/temp"
-# # dir <- "C:/DATA/LU/Results"
-# dir <- "C:/Users/Martins Liberts/Documents/DATA/LU/Work"
-
-
-# # DATA
-# setwd(dir)
-# frame.p <- attach.big.matrix("frame.p.desc")
-# frame.h <- attach.big.matrix("frame.h.desc")
-
-# head(frame.p)
-# head(frame.h)
-
-
-
-# # Temp parameters
-
-# frame.1 <- frame.p
-# frame.2 <- frame.h
-# n <- 10
-# name.weight <- ".dw"
-# name.cluster <- "H_ID"
-
-
-# ### Testing
-
-
-# nrow(frame.p)
-
-# s <- SamplingCluster(frame.1 = frame.p, frame.2 = frame.h, n = 500,
- # name.weight = ".dw", name.cluster = "H_ID")
-# head(s)
-# sum(s$.dw)

@@ -1,48 +1,22 @@
-# ###### Function VarSRS
+###### Function VarSRS
 
-# ### Ver01
-# # Initial version
-
-
-# # libs
-# library(bigmemory)
-
-
-# # Workdir
-# # dir <- "/home/djhurio/temp"
-# # dir <- "C:/DATA/LU/Results"
-# dir <- "C:/Users/Martins Liberts/Documents/DATA/LU/Work"
-
-
-# # DATA
-# setwd(dir)
-# pop <- attach.big.matrix("pop2.desc")
-# head(pop)
-
-
-
-# # Temp parameters
-# data <- pop
-# par <- rbind(c("sum","y1",NA), c("sum","y2",NA), c("mean","y1",NA), c("ratio","y2","y4"))
-# n <- 10
+### Ver01
+# Initial version
 
 VarSRS <- function(data, par, n) {
 
   # Argument type convertion
-  
   if (!is.big.matrix(data)) data <- as.data.frame(data)
   par <- as.matrix(par)
   n <- as.integer(n)
 
   # Testing
-  
   N <- nrow(data)
   if (n<=0 | n>N) stop("ERROR: n has to be in 0-N")
   if (!all(par[,1] %in% c("sum", "mean", "ratio"))) stop("ERROR: in par 1")
   if (ncol(par) != 3) stop("ERROR: in par 2")
 
   # Var estimation
-  
   f <- n/N
   E <- NULL
 
@@ -65,13 +39,3 @@ VarSRS <- function(data, par, n) {
   rownames(E) <- NULL
   return(E)
 }
-
-# par <- rbind(c("sum","y1",NA))
-# VarSRS(data=pop, par=par, n=10)
-
-# par <- rbind(c("sum","y1",NA), c("sum","y2",NA), c("mean","y1",NA), c("ratio","y2","y4"))
-# VarSRS(data=pop, par=par, n=10)
-# VarSRS(data=pop, par=par, n=100)
-# VarSRS(data=pop, par=par, n=1000)
-
-# sqrt(Var_SRS(data=pop, par=par, n=1000))

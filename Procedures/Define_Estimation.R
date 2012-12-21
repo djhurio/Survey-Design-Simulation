@@ -6,7 +6,6 @@
 ### Ver02
 # Weights are defined as vector or scalar
 
-
 Estimation <- function(x, w, param) {
 
   # Libs
@@ -28,7 +27,6 @@ Estimation <- function(x, w, param) {
 
   E <- as.data.frame(matrix(NA, 1, 2+nrow(param)))
   
-#   E <- cbind(N, n)
   E[1,1] <- N
   E[1,2] <- n
   colnames(E)[1:2] <- c("N", "n")
@@ -43,64 +41,9 @@ Estimation <- function(x, w, param) {
       estim <- as.matrix(a / b)
       nam <- paste("r", param[i,2], param[i,3], sep=".")
       }
-#     E <- cbind(E, estim)
     E[1,2+i] <- estim
     colnames(E)[2+i] <- nam
     }
 
-#   E
-  
-#   rownames(E) <- NULL
   return(E)
 }
-
-
-
-
-################
-### Dev area ###
-################
-
-# # libs
-# library(bigmemory)
-# 
-# 
-# # Workdir
-# dir.data <- "~/DATA/LU/Work"
-# 
-# 
-# # DATA
-# 
-# setwd(dir.data)
-# 
-# pop <- attach.big.matrix("frame.p.desc")
-# head(pop)
-# N <- nrow(pop)
-# 
-# n <- 1000
-# s <- as.data.frame(pop[sample(1:N, n), ])
-# s$dw <- N/n
-# head(s)
-# 
-# dw <- rep(N/n, n)
-# 
-# param <- rbind(c("sum","Empl",NA), c("sum","Unempl",NA), c("mean","Empl",NA), c("ratio","Unempl","Act"))
-# param
-# 
-# 
-# ### Temp param
-# 
-# x <- s
-# w <- dw
-# param <- param
-# 
-# head(x)
-# head(pop)
-# 
-# head(s)
-# 
-# Estimation(x=s, w=dw, param=param)
-# Estimation(x=s, w=N/n, param=param)
-# Estimation(x=s, w=s[,"dw"], param=param)
-# Estimation(x=s, w=s$dw, param=param)
-# 

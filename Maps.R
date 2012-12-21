@@ -10,11 +10,11 @@
 
 
 ## you will need the sp-package
-library(sp)
-library(rgdal)
+require(sp)
+require(rgdal)
 require(bigmemory)
-library(grid)
-library(ggplot2)
+require(grid)
+require(ggplot2)
 
 ## load a file from GADM (you just have to specify the countries "special part" of the file name, like "ARG" for Argentina. Optionally you can specify which level you want to have
 
@@ -56,47 +56,12 @@ points(500000, 300000, pch = 3, cex = 0.4, col = "red")
 plot(LV2_LKS92)
 points(500000, 300000, pch = 3, cex = 0.4, col = "red")
 
-
-
-
 class(LV0)
 class(LV0_LKS92)
-
-# plot(LV0)
-# points(LV0_LKS92)
-# 
-# ?overlay
-# 
-# overlay(LV0, LV0_LKS92)
-# 
-# temp <- rbind(LV0, LV0_LKS92)
-# 
-# 
-# getCountries <- function (fileNames, level = 0, ...) {
-#   polygon <- sapply(fileNames, loadChangePrefix, level)
-#   polyMap <- do.call("rbind", polygon)
-#   polyMap
-# }
-# 
-# spdf <- getCountries(c("LV0","LV0_LKS92"))
-# plot(spdf) # should draw a map with Brasil, Argentina and Chile on it.
-# 
-# 
-# 
-# plot(LV0)
-# 
-# 
-# plot
-# 
-# ?spplot
-# ?grid.raster
-# 
-# help.start()
 
 
 #### Save maps
 
-# setwd("~/Dropbox/LU/Darbs/Simulation/050_Simulation/20_Procedures")
 setwd(projwd)
 save(LV0_LKS92, LV1_LKS92, LV2_LKS92, file = "LV_maps.Rdata")
 
@@ -130,6 +95,3 @@ points(geo, pch = 3, cex = 0.4, col = "red")
 title("Latvia (Rajoni)")
 
 dev.off()
-
-
-### END ###

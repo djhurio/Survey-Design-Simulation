@@ -1,12 +1,5 @@
 ### Function to compute secondary estimates
 
-### Dev par
-
-# x <- matrix(runif(90) * 10, 30, 3)
-# var.names <- letters[1:3]
-# colnames(x) <- var.names
-# head(x)
-
 CompEmp <- function(x, var.names) {
   
   x <- as.data.frame(x)
@@ -23,11 +16,3 @@ CompEmp <- function(x, var.names) {
   
   return(x)
 }
-
-
-# x.tmp <- matrix(runif(90) * 10, 30, 3)
-# colnames(x.tmp) <- letters[1:3]
-# 
-# head(x.tmp)
-# 
-# CompEmp(x.tmp, colnames(x.tmp))

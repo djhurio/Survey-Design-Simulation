@@ -1,8 +1,8 @@
 ###### Function: SamplingClusterStrWeekWeek
 ### Stratified SRS cluster sampling with allocation by weeks
 
-# ### Ver01
-# # Initial version
+### Ver01
+# Initial version
  
 SamplingClusterStrWeek <- function(frame.1,
                                    frame.2,
@@ -63,10 +63,11 @@ SamplingClusterStrWeek <- function(frame.1,
   
   # Sampling
   s.2.index <- unlist(mapply(sample.mod, N, n, a, SIMPLIFY = F))
-  #s.2 <- data.frame(frame.2[s.2.index, name.cluster, drop = F])
   s.2 <- data.frame(frame.2[s.2.index, c(name.strata, name.cluster)])
+
   # Weeks
   s.2[name.week] <- rep(1:weeks, times = sum(n) / weeks)
+  
   # Weights
   s.2[name.weight] <- w[match(s.2[, name.strata], sort(unique(s.2[, name.strata])))]
   
@@ -77,75 +78,3 @@ SamplingClusterStrWeek <- function(frame.1,
 
   return(s.1)
 }
-
-
-
-
-################
-### Dev area ###
-################
-
-# # libs
-# library(bigmemory)
-# library(bigtabulate)
-# 
-# library(sampling)
-# library(rbenchmark)
-# 
-# 
-# # Workdir
-# # dir <- "/home/djhurio/temp"
-# # dir <- "C:/DATA/LU/Results"
-# # dir.data <- "C:/Users/Martins Liberts/Documents/DATA/LU/Work"
-# dir.data <- "~/DATA/LU/Work"
-# 
-# 
-# # DATA
-# setwd(dir.data)
-# frame.p <- attach.big.matrix("frame.p.desc")
-# frame.h <- attach.big.matrix("frame.h.desc")
-# 
-# head(frame.p)
-# head(frame.h)
-# 
-# 
-# 
-# 
-# # Temp parameters
-# 
-# frame.1 <- frame.p
-# frame.2 <- frame.h
-# n <- c(10, 10, 0, 10)
-# name.weight <- ".dw"
-# name.cluster <- "H_ID"
-# name.strata <- "strata"
-# name.week <- ".week"
-# weeks <- 5
-# 
-# 
-# ###############
-# ### Testing ###
-# ###############
-# 
-# # Sample size
-# 
-# s <- SamplingClusterStrWeek(frame.p, frame.h, c(5, 5, 5, 5), name.cluster = "H_ID", name.strata = "strata", weeks = 5)
-# s
-# sum(s$.dw)
-# table(s[s$P_ID == 1, "strata"])
-# table(s[s$P_ID == 1, ".week"])
-# 
-# s <- SamplingClusterStrWeek(frame.p, frame.h, c(5, 0, 0, 0), name.cluster = "H_ID", name.strata = "strata", weeks = 5)
-# s
-# sum(s$.dw)
-# table(s[s$P_ID == 1, "strata"])
-# table(s[s$P_ID == 1, ".week"])
-# 
-# # Error
-# s <- SamplingClusterStrWeek(frame.p, frame.h, c(5, 5, 5, 4), name.cluster = "H_ID", name.strata = "strata3", weeks = 5)
-# 
-# s <- SamplingClusterStrWeek(frame.p, frame.h, c(5, 5, 5), name.cluster = "H_ID", name.strata = "strata3", weeks = 7)
-# s
-# sum(s$.dw)
-# table(s[s$P_ID == 1, "strata3"])
-# table(s[s$P_ID == 1, ".week"])

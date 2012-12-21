@@ -16,7 +16,6 @@ SamplingSRSStrWeek <- function(frame.1,
   require(bigtabulate)
   
   # Argument type convertion
-  
   if (!is.big.matrix(frame.1)) frame.1 <- as.data.frame(frame.1)
   n <- as.vector(as.integer(n))
   name.weight <- as.character(name.weight)[1]
@@ -25,7 +24,6 @@ SamplingSRSStrWeek <- function(frame.1,
   weeks <- as.integer(weeks)[1]
   
   # Testing
-  
   if (name.weight %in% colnames(frame.1))
     print("WARNING: Weight variable exists, it will be overwritten")
   if (name.week %in% colnames(frame.1))
@@ -65,58 +63,3 @@ SamplingSRSStrWeek <- function(frame.1,
 
   return(s.1)
 }
-
-# rep(1:5, 3)
-# rep(1:5, each = 3)
-# rep(1:5, times = 3)
-
-
-####### Dev area ########
-
-# # libs
-# library(bigmemory)
-# 
-# 
-# # DATA
-# setwd(dir.data)
-# pop <- attach.big.matrix("frame.p.desc")
-# head(pop)
-# 
-# 
-# # Test
-# 
-# nrow(pop)
-# 
-# s <- SamplingSRSStrWeek(frame.1 = pop, n = rep(0, 4), weeks = 2,
-#                         name.strata = "strata")
-# 
-# s <- SamplingSRSStrWeek(frame.1 = pop, n = (1:4)*5, weeks = 5,
-#                         name.strata = "strata")
-# s
-# nrow(s)
-# sum(s$.dw) == nrow(pop)
-# table(s$.week)
-# table(s$strata)
-# 
-# s <- SamplingSRSStrWeek(frame.1 = pop, n = (1:4)*6, weeks = 5,
-#                         name.strata = "strata")
-# s
-# nrow(s)
-# sum(s$.dw) == nrow(pop)
-# table(s$.week)
-# table(s$strata)
-# 
-# s <- SamplingSRSStrWeek(frame.1 = pop, n = 10, weeks = 6,
-#                         name.strata = "const")
-# s
-# nrow(s)
-# sum(s$.dw) == nrow(pop)
-# table(s$.week)
-# 
-# s <- SamplingSRSStrWeek(frame.1 = pop, n = 0:3, weeks = 5,
-#                         name.strata = "strata")
-# s
-# nrow(s)
-# sum(s$.dw) == nrow(pop)
-# table(s$.week)
-# table(s$strata)
