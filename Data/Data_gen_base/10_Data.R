@@ -627,7 +627,7 @@ save(frame.int, file = "frame.int.Rdata")
 
 
 
-#################### Add int.ID to pop and pop.h
+#################### Add int.ID to pop and pop.h ####
 
 setwd(dir.data)
 
@@ -676,6 +676,12 @@ pop.h <- data.frame(casenum = 1:nrow(pop.h), pop.h)
 
 rownames(pop) <- NULL
 rownames(pop.h) <- NULL
+
+
+# Add strata3
+pop$strata3 <- ifelse(pop$strata == 4, 3, pop$strata)
+pop.h$strata3 <- ifelse(pop.h$strata == 4, 3, pop.h$strata)
+
 
 head(pop)
 head(pop.h)
@@ -891,3 +897,4 @@ sum(frame.PSU$size)
 load("frame.int.Rdata")
 test.df(frame.int)
 nrow(frame.int)
+
