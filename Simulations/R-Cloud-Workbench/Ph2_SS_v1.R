@@ -229,6 +229,7 @@ N <- bigtable(frame.p, "strata3")
 M <- bigtable(frame.h, "strata3")
 
 m.max <- c(1, 2, 3) * 8 * 13 * c(10, 7, 8+9)
+# m.max is too big. c(1, 2, 2) has to be used. Does not make impact to the results.
 n.max <- round(m.max * N / M / 13) * 13
 m.min <- rep(13, 3)
 n.min <- m.min

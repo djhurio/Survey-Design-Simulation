@@ -20,6 +20,7 @@ require(TSP)
 require(maps)
 require(sp)
 require(maptools)
+require(rgdal)
 
 require(plotrix)
 
@@ -613,7 +614,6 @@ test.df(frame.int)
 plot(frame.int$x_int, frame.int$y_int, pch = 20, asp = 1)
 
 
-
 test.df(frame.PSU)
 test.df(frame.int)
 
@@ -632,7 +632,10 @@ save(frame.int, file = "frame.int.Rdata")
 setwd(dir.data)
 
 load("frame.PSU.Rdata")
+load("frame.int.Rdata")
+
 test.df(frame.PSU)
+test.df(frame.int)
 
 load("pop.Rdata")
 load("pop.h.Rdata")
@@ -683,6 +686,80 @@ pop$strata3 <- ifelse(pop$strata == 4, 3, pop$strata)
 pop.h$strata3 <- ifelse(pop.h$strata == 4, 3, pop.h$strata)
 
 
+# Coordinates
+
+head(pop)
+geo.coord <- pop[c("coord_x_p", "coord_y_p")]
+head(geo.coord)
+
+coordinates(geo.coord) <- c("coord_x_p", "coord_y_p")
+proj4string(geo.coord) <- CRS("+proj=tmerc +lat_0=0 +lon_0=24 +k=0.9996 +x_0=500000 +y_0=-6000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+head(as.data.frame(geo.coord))
+
+geo.coord <- data.frame(spTransform(geo.coord, CRS("+proj=latlon")))
+head(geo.coord)
+names(geo.coord) <- c("Lon", "Lat")
+
+pop <- data.frame(pop, geo.coord["Lat"], geo.coord["Lon"])
+head(pop)
+tail(pop)
+
+###
+
+head(pop.h)
+geo.coord <- pop.h[c("coord_x_p", "coord_y_p")]
+head(geo.coord)
+
+coordinates(geo.coord) <- c("coord_x_p", "coord_y_p")
+proj4string(geo.coord) <- CRS("+proj=tmerc +lat_0=0 +lon_0=24 +k=0.9996 +x_0=500000 +y_0=-6000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+head(as.data.frame(geo.coord))
+
+geo.coord <- data.frame(spTransform(geo.coord, CRS("+proj=latlon")))
+head(geo.coord)
+names(geo.coord) <- c("Lon", "Lat")
+
+pop.h <- data.frame(pop.h, geo.coord["Lat"], geo.coord["Lon"])
+head(pop.h)
+tail(pop.h)
+
+###
+
+head(frame.PSU)
+geo.coord <- frame.PSU[c("x_PSU", "y_PSU")]
+head(geo.coord)
+
+coordinates(geo.coord) <- c("x_PSU", "y_PSU")
+proj4string(geo.coord) <- CRS("+proj=tmerc +lat_0=0 +lon_0=24 +k=0.9996 +x_0=500000 +y_0=-6000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+head(as.data.frame(geo.coord))
+
+geo.coord <- data.frame(spTransform(geo.coord, CRS("+proj=latlon")))
+head(geo.coord)
+names(geo.coord) <- c("Lon", "Lat")
+
+frame.PSU <- data.frame(frame.PSU, geo.coord["Lat"], geo.coord["Lon"])
+head(frame.PSU)
+tail(frame.PSU)
+
+###
+
+head(frame.int)
+geo.coord <- frame.int[c("x_int", "y_int")]
+head(geo.coord)
+
+coordinates(geo.coord) <- c("x_int", "y_int")
+proj4string(geo.coord) <- CRS("+proj=tmerc +lat_0=0 +lon_0=24 +k=0.9996 +x_0=500000 +y_0=-6000000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")
+head(as.data.frame(geo.coord))
+
+geo.coord <- data.frame(spTransform(geo.coord, CRS("+proj=latlon")))
+head(geo.coord)
+names(geo.coord) <- c("Lon", "Lat")
+
+frame.int <- data.frame(frame.int, geo.coord["Lat"], geo.coord["Lon"])
+head(frame.int)
+tail(frame.int)
+
+###
+
 head(pop)
 head(pop.h)
 
@@ -711,6 +788,8 @@ test.df(frame.h.df)
 save(frame.p.df, file = "frame.p.Rdata")
 save(frame.h.df, file = "frame.h.Rdata")
 
+save(frame.PSU, file = "frame.PSU.Rdata")
+save(frame.int, file = "frame.int.Rdata")
 
 ### Bigmatrix
 

@@ -48,6 +48,7 @@ gDirections <- function(origin, destination) {
 gDirections("Rīga", "Viesīte")
 gDirections("Lāpstu iela 15, Rīga", "Skolas iela 19, Rīga")
 
+gDirections("56.9, 24.1", "56.6, 23.7")
 
 
 ### Nominatim Search Service
@@ -106,3 +107,5 @@ oDirections(oGeoCode("Daugavpils"), oGeoCode("Ventspils"))
 oDirections(oGeoCode("15, Lāpstu iela, Rīga, Latvija"), oGeoCode("Elizabetes iela 21, Rīga"))
 gDirections("Lāpstu iela 15, Rīga", "Elizabetes iela 21, Rīga")
 
+oDirections(oGeoCode("56.9, 24.1"), oGeoCode("56.8, 21.9"))
+gDirections("56.9, 24.1", "56.8, 21.9")
