@@ -56,17 +56,17 @@ est5
 
 #### Response indicators ####
 
-set.seed(24022013)
-
-head(frame.p)
-resp.p <- Resp(frame.1 = frame.p, names.ID = c("H_ID", "P_ID"),
-               name.by = "strata", p = c(.6, .7, .75, .8), prob = F)
-head(resp.p)
-
-head(frame.h)
-resp.h <- Resp(frame.1 = frame.h, names.ID = "H_ID",
-               name.by = "strata", p = c(.6, .7, .75, .8), prob = F)
-head(resp.h)
+# set.seed(24022013)
+# 
+# head(frame.p)
+# resp.p <- Resp(frame.1 = frame.p, names.ID = c("H_ID", "P_ID"),
+#                name.by = "strata", p = c(.6, .7, .75, .8), prob = F)
+# head(resp.p)
+# 
+# head(frame.h)
+# resp.h <- Resp(frame.1 = frame.h, names.ID = "H_ID",
+#                name.by = "strata", p = c(.6, .7, .75, .8), prob = F)
+# head(resp.h)
 
 
 #### Simulation design ####
@@ -124,6 +124,13 @@ test <- eval(parse(text = des3))
 head(test)
 nrow(test[test$P_ID == 1, ])
 
+tmp.resp <- Resp(frame.1 = test, names.ID = "H_ID",
+                 name.by = "strata", p = c(.6, .7, .75, .8), prob = F)
+
+test <- merge(test, tmp.resp)
+
+tmp <- aggregate(test["resp"], test["H_ID"], max)
+head(tmp)
 
 #### run function ####
 
@@ -153,19 +160,61 @@ run.1 <- function(code, n = NA) {
   return(est)
 }
 
-test <- run.1(des1, n1)
+head(pop.eka[, 1:10])
+
+run.2 <- function(code, n = NA) {
+  s <- eval(parse(text = code))
+  s2 <- extr.data(pop.eka, s$casenum, s$.week, 5, "eka.time")
+  s <- merge(s, s2)
+  
+  s.h <- unique(s[c("H_ID", "strata")])
+  
+  resp.h <- Resp(frame.1 = s.h, names.ID = "H_ID",
+                 name.by = "strata", p = c(.6, .7, .75, .8), prob = F)
+  
+  s <- merge(s, resp.h)
+  s <- RHG(x = s, name.w = ".dw", name.rhg = "strata", name.resp = "resp")
+  
+  s$empl <- as.integer(s$eka.time == 1)
+  s$unempl <- as.integer(s$eka.time == 2)
+  s$inact <- as.integer(s$eka.time == 3)
+  s$age.gr <- ifelse(s$vec <= 24, 1, 2)
+  
+  d1 <- domeni(s[c("empl", "unempl", "inact")], s["strata"])
+  d2 <- domeni(s[c("empl", "unempl", "inact")], s["age.gr"])
+  d3 <- domeni(s[c("empl", "unempl", "inact")], s[c("strata", "age.gr")])
+  s <- data.frame(s, d1, d2, d3)
+  
+  p <- cbind("sum", c("empl", "unempl", "inact",
+                      colnames(d1), colnames(d2), colnames(d3)), NA)
+  est <- Estimation(s, s$.w.rhg, p)
+  
+  agg <- aggregate(s["resp"], s["H_ID"], max)
+  
+  d0 <- vTrip.fast.1(s[ , c("int.ID", ".week", "coord_x_p", "coord_y_p")],
+                     frame.int[c("int.ID", "x_int", "y_int")])
+  
+  est <- data.frame(est, n.p = nrow(s), n.h = nrow(agg),
+                    resp.p = sum(s$resp), resp.h = sum(agg$resp),
+                    dist = d0)
+  
+  return(est)
+}
+
+test <- run.2(des1, n1)
 t(test)
 
-test <- run.1(des2, n2)
+test <- run.2(des2, n2)
 t(test)
 
-test <- run.1(des3, n3)
+test <- run.2(des3, n3)
 t(test)
 
 ncol(test)
 length(test)
 
-### Arguments
+
+#### Simulation arguments ####
 
 arg1 <- list(code = c(des1), n = n1)
 arg2 <- list(code = c(des2), n = n2)
@@ -176,7 +225,7 @@ arg
 ### Test
 
 setwd(dir.tmp)
-test <- Sim(fun = "run.1", arg = arg, I = 4)
+test <- Sim(fun = "run.2", arg = arg, I = 2)
 test[[1]]
 
 I <- 4*5
@@ -185,19 +234,18 @@ test <- Sim(fun = "run.1", arg = arg, I = I)
 head(test[[1]])
 time_iter <- test[[2]] / I
 
-I2 <- 10e3
+I2 <- 1e3
 time_iter * I2 / 3600
 
 Sys.time() + time_iter * I2
 
 
-### Run simulation
-### Phase3 - Precision of Two Stage sampling design
+#### Run simulation ####
 
 setwd(dir.res)
 getwd()
 
-res <- Sim(fun = "run.1", name = "res_Ph3_TS_run2", arg = arg, I = I2)
+res <- Sim(fun = "run.1", name = "res_Ph5_NR_run1", arg = arg, I = I2)
 
 head(res[[1]])
 res[[2]] / I
