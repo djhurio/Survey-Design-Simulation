@@ -12,9 +12,9 @@
 # .Platform$GUI
 
 ### Reset
-# setwd(projwd)
-# rm(list = ls())
-# gc()
+setwd(projwd)
+rm(list = ls())
+gc()
 source(".Rprofile")
 
 ls()
@@ -134,31 +134,31 @@ head(tmp)
 
 #### run function ####
 
-head(pop.eka[, 1:10])
-
-run.1 <- function(code, n = NA) {
-  s <- eval(parse(text = code))
-  s2 <- extr.data(pop.eka, s$casenum, s$.week, 5, "eka.time")
-  s <- merge(s, s2)
-  
-  s <- merge(s, resp.h)
-  s <- RHG(x = s, name.w = ".dw", name.rhg = "strata", name.resp = "resp")
-  
-  s$empl <- as.integer(s$eka.time == 1)
-  s$unempl <- as.integer(s$eka.time == 2)
-  s$inact <- as.integer(s$eka.time == 3)
-  s$age.gr <- ifelse(s$vec <= 24, 1, 2)
-  
-  d1 <- domeni(s[c("empl", "unempl", "inact")], s["strata"])
-  d2 <- domeni(s[c("empl", "unempl", "inact")], s["age.gr"])
-  d3 <- domeni(s[c("empl", "unempl", "inact")], s[c("strata", "age.gr")])
-  s <- data.frame(s, d1, d2, d3)
-  
-  p <- cbind("sum", c("empl", "unempl", "inact",
-                      colnames(d1), colnames(d2), colnames(d3)), NA)
-  est <- Estimation(s, s$.w.rhg, p)
-  return(est)
-}
+# head(pop.eka[, 1:10])
+# 
+# run.1 <- function(code, n = NA) {
+#   s <- eval(parse(text = code))
+#   s2 <- extr.data(pop.eka, s$casenum, s$.week, 5, "eka.time")
+#   s <- merge(s, s2)
+#   
+#   s <- merge(s, resp.h)
+#   s <- RHG(x = s, name.w = ".dw", name.rhg = "strata", name.resp = "resp")
+#   
+#   s$empl <- as.integer(s$eka.time == 1)
+#   s$unempl <- as.integer(s$eka.time == 2)
+#   s$inact <- as.integer(s$eka.time == 3)
+#   s$age.gr <- ifelse(s$vec <= 24, 1, 2)
+#   
+#   d1 <- domeni(s[c("empl", "unempl", "inact")], s["strata"])
+#   d2 <- domeni(s[c("empl", "unempl", "inact")], s["age.gr"])
+#   d3 <- domeni(s[c("empl", "unempl", "inact")], s[c("strata", "age.gr")])
+#   s <- data.frame(s, d1, d2, d3)
+#   
+#   p <- cbind("sum", c("empl", "unempl", "inact",
+#                       colnames(d1), colnames(d2), colnames(d3)), NA)
+#   est <- Estimation(s, s$.w.rhg, p)
+#   return(est)
+# }
 
 head(pop.eka[, 1:10])
 
@@ -229,12 +229,12 @@ test <- Sim(fun = "run.2", arg = arg, I = 2)
 test[[1]]
 
 I <- 4*5
-test <- Sim(fun = "run.1", arg = arg, I = I)
+test <- Sim(fun = "run.2", arg = arg, I = I)
 
 head(test[[1]])
 time_iter <- test[[2]] / I
 
-I2 <- 1e3
+I2 <- 2500
 time_iter * I2 / 3600
 
 Sys.time() + time_iter * I2
@@ -245,7 +245,7 @@ Sys.time() + time_iter * I2
 setwd(dir.res)
 getwd()
 
-res <- Sim(fun = "run.1", name = "res_Ph5_NR_run1", arg = arg, I = I2)
+res <- Sim(fun = "run.2", name = "res_Ph5_NR_run3", arg = arg, I = I2)
 
 head(res[[1]])
-res[[2]] / I
+res[[2]] / I2
