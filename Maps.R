@@ -24,6 +24,10 @@ require(scales)
 sourceDir(dir.proc, F)
 
 
+### Settings
+pdf.options(family = "Times")
+
+
 # Function for ggplot2 colour scales
 gg_color_hue <- function(n) {
   hues = seq(15, 375, length=n+1)
@@ -124,6 +128,8 @@ head(frame.h.df)
 load("frame.int.Rdata")
 head(frame.int)
 
+load("frame.PSU.Rdata")
+head(frame.PSU)
 
 ###
 
@@ -211,12 +217,57 @@ pl5 <- ggplot(LV2_LKS92_df, aes(long, lat)) +
   theme_bw() + theme(legend.position="none")
 pl5
 
+str <- factor(frame.h.df[, "strata"],
+                 labels = c("Riga", "Cities", "Towns", "Rural a."))
+table(str)
+
+length(ind)
+
+ind <- sample(nrow(frame.h.df), 50e3)
+ind <- 1:nrow(frame.h.df)
+
+pl6 <- ggplot(LV2_LKS92_df, aes(long, lat)) +
+  geom_point(size = .5, colour = "gray") +
+  geom_point(aes(coord_x_p, coord_y_p,
+                 colour = factor(strata,
+                                 labels = c("Riga", "Cities",
+                                            "Towns", "Rural a."))),
+             data = frame.h.df[ind, ], alpha = a, size = s) +
+  labs(x = "LKS92 E", y = "LKS92 N") +
+  scale_y_continuous(labels = comma) +
+  scale_x_continuous(labels = comma) +
+  labs(colour = "strata") +
+  guides(colour = guide_legend(override.aes = list(alpha = 1, size = 5))) +
+  theme_bw(base_size = 18) + coord_fixed()
+# pl6
+
 setwd(dir.res)
 
-ggsave(pl1, file = "Map_LV_all.png")
-ggsave(pl2, file = "Map_LV_strata3.png")
-ggsave(pl5, file = "Map_LV_strata3_int.png")
+# ggsave(pl1, file = "Map_LV_all.png")
+# ggsave(pl2, file = "Map_LV_strata3.png")
+# ggsave(pl5, file = "Map_LV_strata3_int.png")
+ggsave(pl6, file = "Map_LV_strata.png", dpi = 150)
 
+
+### Rural PSU serpentine #####
+
+head(frame.PSU[frame.PSU$strata == 4, ])
+
+pl6 <- ggplot(LV2_LKS92_df, aes(long, lat)) +
+  geom_point(size = .5, colour = "gray") +
+  geom_point(aes(x_PSU, y_PSU, colour = "red"),
+            data = frame.PSU[frame.PSU$strata == 4, ]) +
+  geom_path(aes(x_PSU, y_PSU, linetype = "dotted"),
+            data = frame.PSU[frame.PSU$strata == 4, ]) +
+  labs(x = "LKS92 E", y = "LKS92 N") +
+  scale_y_continuous(labels = comma) +
+  scale_x_continuous(labels = comma) +
+  theme_bw(base_size = 24) + theme(legend.position="none") + coord_fixed()
+pl6
+
+setwd(dir.res)
+
+ggsave(pl6, file = "PSU_serpentine_rural.pdf")
 
 
 

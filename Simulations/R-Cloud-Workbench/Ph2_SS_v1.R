@@ -76,8 +76,10 @@ setwd(dir.tmp)
 
 ### Sim functions
 
-d1 <- 'SamplingSRSStrWeek(frame.1 = frame.p, n = n, name.strata = "strata3", weeks = 13)'
-d2 <- 'SamplingClusterStrWeek(frame.1 = frame.p, frame.2 = frame.h, n = n, name.cluster = "H_ID", name.strata = "strata3", weeks = 13)'
+d1 <- 'SamplingSRSStrWeek(frame.1 = frame.p, n = n, name.strata = "strata3",
+  weeks = 13)'
+d2 <- 'SamplingClusterStrWeek(frame.1 = frame.p, frame.2 = frame.h, n = n,
+  name.cluster = "H_ID", name.strata = "strata3", weeks = 13)'
 
 
 
@@ -89,16 +91,19 @@ setwd(dir.tmp)
 
 run <- function(code, n) {
   s <- eval(parse(text = code))
-  #n.p.0 <- nrow(s)
-  #n.h.0 <- as.integer(sum(s$P_ID == 1))
   n.p.s <- as.integer(bigtable(s, "strata3"))
   n.h.s <- as.integer(bigtable(unique(s[c("H_ID", "strata3")]), "strata3"))
-  #d0 <- vTrip.fast.1(s[ , c("int.ID", ".week", "coord_x_p", "coord_y_p")], frame.int[c("int.ID", "x_int", "y_int")])
-  d1 <- vTrip.fast.1(s[s$strata3 == 1, c("int.ID", ".week", "coord_x_p", "coord_y_p")], frame.int[c("int.ID", "x_int", "y_int")])
-  d2 <- vTrip.fast.1(s[s$strata3 == 2, c("int.ID", ".week", "coord_x_p", "coord_y_p")], frame.int[c("int.ID", "x_int", "y_int")])
-  d3 <- vTrip.fast.1(s[s$strata3 == 3, c("int.ID", ".week", "coord_x_p", "coord_y_p")], frame.int[c("int.ID", "x_int", "y_int")])
-  #res <- data.frame(strata = 0:3, count.P = c(n.p.0, n.p.s), count.H = c(n.h.0, n.h.s), dist = c(d0, d1, d2, d3) / 1e3)
-  res <- data.frame(strata = 1:3, count.P = n.p.s, count.H = n.h.s, dist = c(d1, d2, d3) / 1e3)
+  d1 <- vTrip.fast.1(s[s$strata3 == 1,
+                       c("int.ID", ".week", "coord_x_p", "coord_y_p")],
+                     frame.int[c("int.ID", "x_int", "y_int")])
+  d2 <- vTrip.fast.1(s[s$strata3 == 2,
+                       c("int.ID", ".week", "coord_x_p", "coord_y_p")],
+                     frame.int[c("int.ID", "x_int", "y_int")])
+  d3 <- vTrip.fast.1(s[s$strata3 == 3,
+                       c("int.ID", ".week", "coord_x_p", "coord_y_p")],
+                     frame.int[c("int.ID", "x_int", "y_int")])
+  res <- data.frame(strata = 1:3, count.P = n.p.s, count.H = n.h.s,
+                    dist = c(d1, d2, d3) / 1e3)
   return(res)
 }
 
@@ -182,6 +187,23 @@ proc.est <- function(res, alpha = 0.01) {
   
   return(est)
 }
+
+proc.est.2 <- function(res, alpha = 0.01) {
+  t1 <- aggregate(res[c("count.P", "count.H",
+                        "cost", "cost_travel", "cost_interview")],
+                  res[c("design", "strata", "a", "n")], mean)
+  t2 <- aggregate(res["cost"], res[c("design", "strata", "a", "n")], sd)
+  colnames(t2)[ncol(t2)] <- "cost.sd"
+  t3 <- aggregate(res["i"], res[c("design", "strata", "a", "n")], max)
+  
+  est <- merge(merge(t1, t2), t3)
+  est <- est[order(est$design, est$strata, est$a), ]
+  Zt <- qt(1 - alpha/2, est$i - 1)
+  est$cost.cil <- est$cost - est$cost.sd / sqrt(est$i) * Zt
+  est$cost.ciu <- est$cost + est$cost.sd / sqrt(est$i) * Zt
+  
+  return(est)
+}
 ###
 
 ### Function for regression
@@ -195,7 +217,8 @@ proc.reg <- function(est, y) {
   coeff <- as.data.frame(coef(reg.mod))
   colnames(coeff) <- letters[1:ncol(coeff)]
   coeff$TS_cost <- rep(y, each = 2)
-  coeff$n <- (-coeff$c + sqrt(coeff$c^2 - 4*coeff$b*(coeff$a-coeff$TS_cost)))^2/4/coeff$b^2
+  coeff$n <- (-coeff$c + sqrt(coeff$c^2 - 4 * coeff$b *
+                                (coeff$a - coeff$TS_cost)))^2 / 4 / coeff$b^2
   coeff$strata <- substring(rownames(coeff), 1, 1)
   coeff$design <- substring(rownames(coeff), 3)
   rownames(coeff) <- NULL
@@ -213,7 +236,8 @@ plot2 <- function(est, coeff, design, strata, I = NULL) {
     geom_errorbar(limits, width = (max(plot.data$n) - min(plot.data$n)) / 40,
                   colour = 2) +
     geom_hline(yintercept = FWB[strata + 1, "cost"], colour = 3) +
-    geom_point(data = coeff.data, aes(y = TS_cost, x = n), size = 3, colour = 4, shape = 3) +
+    geom_point(data = coeff.data, aes(y = TS_cost, x = n), size = 3, colour = 4,
+               shape = 3) +
     stat_smooth(method=lm, formula = y ~ x + I(sqrt(x)), se = T, fullrange = T,
                 linetype = "dotted", alpha = .2, colour = 5) +
     scale_y_continuous(breaks = round(c(plot.data$cost), 1), labels = comma) +
@@ -229,7 +253,8 @@ N <- bigtable(frame.p, "strata3")
 M <- bigtable(frame.h, "strata3")
 
 m.max <- c(1, 2, 3) * 8 * 13 * c(10, 7, 8+9)
-# m.max is too big. c(1, 2, 2) has to be used. Does not make impact to the results.
+# m.max is too big. c(1, 2, 2) has to be used.
+# Does not make impact to the results.
 n.max <- round(m.max * N / M / 13) * 13
 m.min <- rep(13, 3)
 n.min <- m.min
@@ -315,7 +340,16 @@ head(res2)
 
 est2 <- proc.est(res2)
 head(est2)
+est2
 table(est2$i)
+
+est2a <- proc.est.2(res2)
+head(est2a)
+est2a
+table(est2a$i)
+
+### !!! ###
+est2 <- est2a
 
 coeff2 <- proc.reg(est2, FWB$cost[-1])
 coeff2
@@ -366,13 +400,14 @@ pl15b <- pl15 + geom_point(data = est4[2,], aes(x = n, y = cost),
 pl16b <- pl16 + geom_point(data = est4[3,], aes(x = n, y = cost),
                            shape = 1, size = 20, colour = 3)
 
-pl11b
-pl14b
-pl12b
-pl15b
-pl13b
-pl16b
+# pl11b
+# pl14b
+# pl12b
+# pl15b
+# pl13b
+# pl16b
 
+head(est4)
 
 est5 <- est4[c("design", "strata", "n")]
 est5
@@ -380,6 +415,10 @@ est5
 est6 <- est4[c("design", "strata", "n", "cost",
                "cost.sd", "cost.cil", "cost.ciu", "cost.lim")]
 est6
+
+est7 <- est4[c("design", "strata", "count.P", "count.H",
+               "cost_travel", "cost_interview", "cost", "cost.lim")]
+est7
 
 
 ####### Save results ##########
@@ -403,3 +442,10 @@ ncol(est6)+1
 print(xtable(est6, digits = c(rep(0, 4), rep(1, 5))), include.rownames = F,
       include.colnames = T, only.contents = T, append = F,
       file = "tab_ssizes_Ph2.tex")
+
+est7
+ncol(est7)+1
+print(xtable(est7, digits = c(rep(0, 5), rep(1, 4))),
+      include.rownames = F, include.colnames = T, only.contents = T, append = F,
+      format.args = list(big.mark = " ", decimal.mark = "."),
+      file = "tab_ssizes_cost_Ph2.tex")

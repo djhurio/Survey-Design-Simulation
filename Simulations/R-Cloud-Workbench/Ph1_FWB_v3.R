@@ -58,6 +58,12 @@ load("frame.int.Rdata")
 # dim(pop.eka)
 
 
+#### Average cluster size ####
+
+head(frame.PSU)
+
+aggregate(frame.PSU["size"], frame.PSU["strata"], function(x) round(mean(x)))
+
 
 ### Simulation design ###############################
 
