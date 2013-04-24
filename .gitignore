@@ -1,5 +1,6 @@
 .Rproj.user
 .Rhistory
 .RData
-Results/*
-temp/*
+Results
+temp
+doc
