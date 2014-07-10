@@ -4,10 +4,19 @@
 # Get the working directory of the project
 projwd <- getwd()
 
-dir.data <- "~/DATA/LU/Work"
 dir.proc <- paste(projwd, "Procedures", sep = "/")
-dir.res <- paste(projwd, "Results/temp", sep = "/")
-dir.tmp <- "~/temp/sim"
+
+if (.Platform$OS.type == "windows") {
+  dir.data.source <- "T:/!Vadiba/MatNodrD/Prakses/Data"
+  dir.data <- "C:/DATA/SDS/data"
+  dir.res <- "C:/DATA/SDS/res"
+  dir.tmp <- "C:/DATA/SDS/sim"
+} else {
+  dir.data.source <- "~/DATA/LU/Work"
+  dir.data <- "~/temp/data"
+  dir.res <- "~/temp/res"
+  dir.tmp <- "~/temp/sim"
+}
 
 
 test.df <- function(x) {
